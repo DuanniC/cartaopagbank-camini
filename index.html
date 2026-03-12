@@ -367,6 +367,21 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
       <div class="bc"><div class="bc-icon">💳</div><div class="bc-label">Cartão PagBank</div><div class="bc-value" id="al-cartao-val">R$ 0,00</div><div class="bc-sub">parte do Alan</div></div>
       <div class="bc"><div class="bc-icon">🏠</div><div class="bc-label">apartamento</div><div class="bc-value" id="al-apto-val">R$ 0,00</div><div class="bc-sub" id="al-apto-sub">—</div></div>
     </div>
+
+    <!-- card 💕 cartão do amor -->
+    <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;">
+      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
+        <div>
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:2px;">💕 cartão do meu amor</div>
+          <div style="font-size:0.76rem;color:var(--dusty);font-style:italic;">despesas minhas no cartão dele · subtraído do total</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="al-devo-val" style="font-family:var(--font-num);font-size:1.3rem;font-weight:700;color:#9b5c5c;">—</span>
+          <button onclick="openDevoModal()" style="background:var(--blush);color:var(--mocha);border:none;border-radius:8px;padding:4px 10px;font-size:0.76rem;cursor:pointer;">✏️</button>
+        </div>
+      </div>
+      <div id="devo-lista" style="padding:0 18px;"></div>
+    </div>
   </main>
 </div>
 
@@ -455,6 +470,22 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
   </div>
 </div>
 
+
+<!-- MODAL CARTÃO DO AMOR -->
+<div class="overlay" id="ov-devo" onclick="if(event.target===this)closeDevoModal()">
+  <div class="modal" style="max-width:460px;">
+    <h3>💕 cartão do meu amor</h3>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:6px;">Selecione as despesas das suas pessoais que foram no cartão dele. As parcelas serão distribuídas automaticamente mês a mês.</p>
+    <div id="devo-modal-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:340px;overflow-y:auto;"></div>
+    <div style="font-size:0.76rem;color:var(--dusty);padding:8px 12px;background:var(--cream);border-radius:10px;margin-bottom:14px;">
+      💡 só aparecem despesas das suas <strong>pessoais</strong> que ainda têm parcelas em aberto
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeDevoModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveDevoModal()">💾 salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DESCONTOS ALUGUEL -->
 <div class="overlay" id="ov-desc" onclick="if(event.target===this)closeDescModal()">
@@ -635,7 +666,7 @@ const CAIXA_TAXA=0.0017;
 // legado - mantido apenas para migração automática em getDescAutomaticos()
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},claro:0,divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
+let DB={cartao:[],pessoal:[],apto:{},claro:0,devoIds:[],divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
 let saveTimer=null;
 let cmSplitMode='equal',cmExpType='parc',cmEditId=null;
 let pmExpType='parc',pmEditId=null;
@@ -725,6 +756,7 @@ async function loadData(){
       DB.apto=d.apto||{};
       DB.claro=d.claro||0;
       DB.divisao=d.divisao||{duanni:50,alan:50};
+      DB.devoIds=Array.isArray(d.devoIds)?d.devoIds:(d.devo?[]:[]);
       DB.desc_garagem=d.desc_garagem||null;
       DB.desc_fundo=d.desc_fundo||null;
       DB.descontos=Array.isArray(d.descontos)?d.descontos:null;
@@ -736,7 +768,7 @@ async function loadData(){
     if(bk)try{const p=JSON.parse(bk);DB={...DB,...p};}catch(e2){}
     syncBar('error','⚠️ offline — dados locais. Toque para tentar.');
   }
-  rebuildAllSelects();renderAll();
+  rebuildAllSelects();preencherAptoFuturo();renderAll();
 }
 async function saveData(){
   localStorage.setItem('cc_bk',JSON.stringify(DB));
@@ -780,6 +812,44 @@ function getPessoalMonths(){
   });
   return[...set].sort();
 }
+// Smart month range for Alan
+function getAlanMonths(){
+  const set=new Set();
+  const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
+  set.add(addMos(cy,cm,-1));
+  set.add(TODAY);
+  for(let i=1;i<=3;i++)set.add(addMos(cy,cm,i));
+  (DB.cartao||[]).forEach(e=>{
+    if(!e.mesInicio||(e.payers||[]).indexOf('alan')===-1)return;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const parc=e.tipo==='rec'?4:(e.parcelas||1);
+    const minM=addMos(cy,cm,-1);
+    for(let i=0;i<parc;i++){
+      const m=addMos(iy,im,i);
+      if(m>=minM)set.add(m);
+    }
+  });
+  return[...set].sort();
+}
+// Smart month range for Ronaldo
+function getRonaldoMonths(){
+  const set=new Set();
+  const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
+  set.add(addMos(cy,cm,-1));
+  set.add(TODAY);
+  for(let i=1;i<=3;i++)set.add(addMos(cy,cm,i));
+  (DB.cartao||[]).forEach(e=>{
+    if(!e.mesInicio||(e.payers||[]).indexOf('ronaldo')===-1)return;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const parc=e.tipo==='rec'?4:(e.parcelas||1);
+    const minM=addMos(cy,cm,-1);
+    for(let i=0;i<parc;i++){
+      const m=addMos(iy,im,i);
+      if(m>=minM)set.add(m);
+    }
+  });
+  return[...set].sort();
+}
 // Smart month range for Apartamento
 function getAptoMonths(){
   const set=new Set();
@@ -803,6 +873,45 @@ function getAptoMonths(){
   });
   return [...set].sort();
 }
+// Pré-preenche em cascata todos os meses futuros do apto que ainda estão vazios
+function preencherAptoFuturo(){
+  if(!DB.apto)DB.apto={};
+  const meses=getAptoMonths(); // range completo ordenado
+  let salvou=false;
+  for(let i=1;i<meses.length;i++){
+    const month=meses[i];
+    const prevM=meses[i-1];
+    const d=DB.apto[month]||{};
+    const prevD=DB.apto[prevM]||{};
+    let changed=false;
+    // Caixa: se vazio e mês anterior tem valor, aplica taxa
+    if(!d.caixa&&prevD.caixa&&prevD.caixa.valor){
+      if(!DB.apto[month])DB.apto[month]={};
+      const novoVal=Math.round(prevD.caixa.valor*(1+CAIXA_TAXA)*100)/100;
+      DB.apto[month].caixa={valor:novoVal,status:'pendente'};
+      changed=true;
+    }
+    // Aluguel: se vazio e mês anterior tem valor, copia igual (status sempre pendente)
+    if(!d.aluguel&&prevD.aluguel&&prevD.aluguel.valor){
+      if(!DB.apto[month])DB.apto[month]={};
+      DB.apto[month].aluguel={...prevD.aluguel,status:'pendente'};
+      changed=true;
+    }
+    // Extras: copia itens fixos (sem status pago)
+    if(prevD.extras&&Object.keys(prevD.extras).length){
+      if(!DB.apto[month])DB.apto[month]={};
+      if(!DB.apto[month].extras)DB.apto[month].extras={};
+      Object.entries(prevD.extras).forEach(([k,v])=>{
+        if(!DB.apto[month].extras[k]&&v.valor){
+          DB.apto[month].extras[k]={...v,status:'pendente'};
+          changed=true;
+        }
+      });
+    }
+    if(changed)salvou=true;
+  }
+  if(salvou)saveData();
+}
 function rebuildAllSelects(){
   // Full range for non-pessoal
   let fh='',ff='<option value="">sem fim</option>';
@@ -813,8 +922,8 @@ function rebuildAllSelects(){
   let ch='';
   for(let y=mnY;y<=mxY;y++){const s=y===mnY?mnM:1,e=y===mxY?mxM:12;for(let m=s;m<=e;m++){const v=`${y}-${String(m).padStart(2,'0')}`;ch+=`<option value="${v}">${MN[m-1]} ${y}</option>`;}}
   if(!ch)ch=`<option value="${TODAY}">${MN[NOW.getMonth()]} ${NOW.getFullYear()}</option>`;
-  // Apply full selects
-  ['al-month-sel','cm-mes-compra','cm-rec-inicio'].forEach(id=>{
+  // Apply full selects (modais de cadastro apenas)
+  ['cm-mes-compra','cm-rec-inicio'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     const prev=el.value||TODAY;el.innerHTML=fh;el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
   });
@@ -825,11 +934,19 @@ function rebuildAllSelects(){
   const asel=document.getElementById('a-month-sel');
   if(asel){const prev=asel.value||TODAY;asel.innerHTML=ah;asel.value=asel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   // descontos: sem selects fixos — lista dinâmica no modal
-  // Cartão and Ronaldo range selects
-  ['c-month-sel','ro-month-sel'].forEach(id=>{
-    const el=document.getElementById(id);if(!el)return;
-    const prev=el.value||TODAY;el.innerHTML=ch;el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
-  });
+  // Cartão range
+  const cel=document.getElementById('c-month-sel');
+  if(cel){const prev=cel.value||TODAY;cel.innerHTML=ch;cel.value=cel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  // Smart months Alan
+  const alms=getAlanMonths();
+  let alh='';alms.forEach(v=>{const[y,m]=v.split('-').map(Number);alh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
+  const alel=document.getElementById('al-month-sel');
+  if(alel){const prev=alel.value||TODAY;alel.innerHTML=alh;alel.value=alel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  // Smart months Ronaldo
+  const roms=getRonaldoMonths();
+  let roh='';roms.forEach(v=>{const[y,m]=v.split('-').map(Number);roh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
+  const roel=document.getElementById('ro-month-sel');
+  if(roel){const prev=roel.value||TODAY;roel.innerHTML=roh;roel.value=roel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   // Smart months for Duanni
   const pms=getPessoalMonths();
   let dh='';pms.forEach(v=>{const[y,m]=v.split('-').map(Number);dh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
@@ -1003,11 +1120,40 @@ function renderAlan(){
   document.getElementById('al-month-lbl').textContent=getML(month);
   const cartaoVal=getPersonCartaoTotal('alan',month);
   const aptoVal=getAptoShare(month,'alan');
+  const devoVal=getDevoValMes(month);
   const div=getDivisao();
   const sub=document.getElementById('al-apto-sub');if(sub)sub.innerHTML=`<span class="num">${div.alan||50}%</span> da divisão`;
   document.getElementById('al-cartao-val').innerHTML=fmt(cartaoVal);
   document.getElementById('al-apto-val').innerHTML=fmt(aptoVal);
-  document.getElementById('al-total').innerHTML=fmt(cartaoVal+aptoVal);
+  // devo: mostra valor do mês ou "zerado"
+  const devoEl=document.getElementById('al-devo-val');
+  if(devoEl)devoEl.innerHTML=devoVal>0?fmt(devoVal):'<span style="color:var(--sage);font-size:0.9rem;">✅ nada este mês</span>';
+  // lista de itens no card
+  const devoLista=document.getElementById('devo-lista');
+  if(devoLista){
+    const itens=(DB.devoIds||[]).map(id=>{
+      const e=(DB.pessoal||[]).find(x=>x.id===id);if(!e||!e.mesInicio)return'';
+      const[iy,im]=e.mesInicio.split('-').map(Number);
+      const[ty,tm]=month.split('-').map(Number);
+      const diff=(ty-iy)*12+(tm-im);
+      const parc=e.tipo==='rec'?null:(e.parcelas||1);
+      const valMes=parc?e.total/parc:e.total;
+      const ativo=(e.tipo==='rec'&&diff>=0)||(parc&&diff>=0&&diff<parc);
+      if(!ativo)return`<div style="padding:9px 0;border-bottom:1px solid var(--blush);display:flex;justify-content:space-between;align-items:center;opacity:0.45;">
+        <span style="font-size:0.84rem;color:var(--mocha);">${e.desc}</span>
+        <span style="font-size:0.78rem;color:var(--dusty);">encerrada</span></div>`;
+      const parcLabel=parc?`${diff+1}/${parc}x`:'recorrente';
+      return`<div style="padding:9px 0;border-bottom:1px solid var(--blush);display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:0.84rem;font-weight:500;color:var(--dark);">${e.desc}</div>
+        <div style="font-size:0.72rem;color:var(--dusty);margin-top:1px;">${parcLabel}</div></div>
+        <span style="font-family:var(--font-num);font-size:0.95rem;font-weight:600;color:#9b5c5c;">${fmt(valMes)}</span></div>`;
+    }).filter(Boolean);
+    devoLista.innerHTML=itens.length
+      ?`<div style="padding:4px 0 4px;">${itens.join('')}</div>`
+      :'<div style="padding:12px 0;font-size:0.8rem;color:var(--dusty);font-style:italic;">nenhuma despesa associada ainda</div>';
+  }
+  // total = cartão + apto − devo
+  document.getElementById('al-total').innerHTML=fmt(cartaoVal+aptoVal-devoVal);
 }
 
 // ══ RENDER RONALDO ══
@@ -1084,8 +1230,8 @@ function renderApto(){
   const div=getDivisao();
   // Banner
   document.getElementById('a-resultado').innerHTML=fmt(calc.duanniVal);
-  document.getElementById('a-resultado-sub').textContent=
-    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão ${div.duanni}% / ${div.alan}%`;
+  document.getElementById('a-resultado-sub').innerHTML=
+    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão <span class="num">${div.duanni}%</span> / <span class="num">${div.alan}%</span>`;
   // Build cards
   const IS='width:100%;font-family:\'DM Sans\',sans-serif;font-size:0.88rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:7px 11px;color:var(--dark);outline:none;margin-bottom:5px;';
   function mkCard(key,title,valDisplay,sublabel,status,canDel,editBody,isExtra){
@@ -1340,6 +1486,71 @@ function saveDescModal(){
 }
 
 // ══ CLARO ══
+// Retorna valor que devo ao Alan no mês (soma parcelas das despesas associadas)
+function getDevoValMes(month){
+  return(DB.devoIds||[]).reduce((s,id)=>{
+    const e=(DB.pessoal||[]).find(x=>x.id===id);if(!e||!e.mesInicio)return s;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const[ty,tm]=month.split('-').map(Number);
+    const diff=(ty-iy)*12+(tm-im);
+    if(e.tipo==='rec')return diff>=0?s+(e.total||0):s;
+    const parc=e.parcelas||1;
+    return(diff>=0&&diff<parc)?s+(e.total/parc):s;
+  },0);
+}
+function openDevoModal(){
+  renderDevoModalLista();
+  document.getElementById('ov-devo').classList.add('active');
+}
+function closeDevoModal(){document.getElementById('ov-devo').classList.remove('active');}
+function renderDevoModalLista(){
+  const pessoal=DB.pessoal||[];
+  const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
+  // mostrar todas as pessoais ativas (com parcelas ainda abertas ou recorrentes)
+  const ativos=pessoal.filter(e=>{
+    if(!e.mesInicio)return false;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const diff=(cy-iy)*12+(cm-im);
+    return e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
+  });
+  const ids=DB.devoIds||[];
+  const IS='font-family:\'DM Sans\',sans-serif;font-size:0.87rem;';
+  if(ativos.length===0){
+    document.getElementById('devo-modal-lista').innerHTML='<div style="font-size:0.82rem;color:var(--rose);font-style:italic;text-align:center;padding:16px;">nenhuma despesa pessoal ativa no momento</div>';
+    return;
+  }
+  document.getElementById('devo-modal-lista').innerHTML=ativos.map(e=>{
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const diff=(cy-iy)*12+(cm-im);
+    const parc=e.tipo==='rec'?null:(e.parcelas||1);
+    const valMes=parc?e.total/parc:e.total;
+    const parcLabel=parc?`<span style="font-size:0.73rem;color:var(--dusty);">${diff+1}/${parc}x · ${fmt(valMes)}/mês</span>`:`<span style="font-size:0.73rem;color:var(--dusty);">🔄 ${fmt(valMes)}/mês</span>`;
+    const checked=ids.includes(e.id)?'checked':'';
+    return`<div id="devo-item-${e.id}" onclick="toggleDevoId('${e.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;border:1.5px solid ${checked?'var(--rose)':'var(--blush)'};cursor:pointer;background:${checked?'#fdf3f3':'var(--cream)'};transition:all 0.15s;user-select:none;">
+      <span id="devo-icon-${e.id}" style="font-size:1.2rem;flex-shrink:0;">${checked?'💕':'○'}</span>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem;font-weight:500;color:var(--dark);">${e.desc}</div>
+        <div style="margin-top:2px;">${parcLabel}</div>
+      </div>
+      <div style="font-family:var(--font-num);font-size:1rem;font-weight:600;color:#9b5c5c;">${fmt(e.total)}</div>
+    </div>`;
+  }).join('');
+}
+function toggleDevoId(id){
+  const ids=DB.devoIds||[];
+  const idx=ids.indexOf(id);
+  if(idx>-1)ids.splice(idx,1);else ids.push(id);
+  DB.devoIds=ids;
+  // atualizar visual
+  const checked=ids.includes(id);
+  const el=document.getElementById('devo-item-'+id);
+  const icon=document.getElementById('devo-icon-'+id);
+  if(el){el.style.border=`1.5px solid ${checked?'var(--rose)':'var(--blush)'}`;el.style.background=checked?'#fdf3f3':'var(--cream)';}
+  if(icon)icon.textContent=checked?'💕':'○';
+}
+function saveDevoModal(){
+  saveData();closeDevoModal();renderAlan();toast('💕 atualizado!');
+}
 function saveClaro(){
   const v=parseFloat(document.getElementById('claro-input').value);
   if(isNaN(v)||v<0){toast('⚠️ informe o valor!');return;}
