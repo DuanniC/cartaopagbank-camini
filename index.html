@@ -446,25 +446,14 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
 
 <!-- MODAL DESCONTOS ALUGUEL -->
 <div class="overlay" id="ov-desc" onclick="if(event.target===this)closeDescModal()">
-  <div class="modal" style="max-width:400px;">
-    <h3>🏘️ descontos do aluguel</h3>
-    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:18px;">Valores deduzidos automaticamente do aluguel bruto</p>
-    <div style="background:var(--sage-light);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
-      <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:#4a6044;font-weight:500;margin-bottom:10px;">🚗 Garagem</div>
-      <div class="form-grid">
-        <div class="form-row"><label>valor (R$)</label><input id="desc-gara-val" type="number" step="0.01" placeholder="109,20"></div>
-        <div class="form-row"><label>parcelas totais</label><input id="desc-gara-parc" type="number" min="1" placeholder="24"></div>
-      </div>
-      <div class="form-row"><label>início (mês)</label><select id="desc-gara-inicio" onchange="updateDescGaraStatus()"></select></div>
-      <div id="desc-gara-status" style="font-size:0.76rem;color:#4a6044;margin-top:6px;"></div>
-    </div>
-    <div style="background:var(--blush);border-radius:12px;padding:14px 16px;margin-bottom:18px;">
-      <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:10px;">🏢 Fundo de Reserva</div>
-      <div class="form-row"><label>valor mensal (R$)</label><input id="desc-fundo-val" type="number" step="0.01" placeholder="38,45"></div>
-    </div>
+  <div class="modal" style="max-width:440px;">
+    <h3>⚙️ descontos automáticos do aluguel</h3>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Deduzidos automaticamente do valor bruto todo mês</p>
+    <div id="desc-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+    <button onclick="addDescItem()" style="width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;margin-bottom:16px;">+ adicionar desconto</button>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeDescModal()">cancelar</button>
-      <button class="btn-modal-save btn-dark" onclick="saveDescModal()">💾 salvar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveDescModal()">💾 salvar tudo</button>
     </div>
   </div>
 </div>
@@ -631,10 +620,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SENHA='2710';
 const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
-const DESC_GARAGEM_DEFAULT={valor:109.20,parcelas:24,inicio:'2025-03'};
-const DESC_FUNDO_DEFAULT=38.45;
-function getDescGaragem(){return DB.descGaragem||DESC_GARAGEM_DEFAULT;}
-function getDescFundo(){return DB.descFundo!=null?DB.descFundo:DESC_FUNDO_DEFAULT;}
+// legado - mantido apenas para migração automática em getDescAutomaticos()
 
 // ══ STATE ══
 let DB={cartao:[],pessoal:[],apto:{},claro:0,divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
@@ -729,8 +715,7 @@ async function loadData(){
       DB.divisao=d.divisao||{duanni:50,alan:50};
       DB.desc_garagem=d.desc_garagem||null;
       DB.desc_fundo=d.desc_fundo||null;
-      DB.descGaragem=d.descGaragem||null;
-      DB.descFundo=d.descFundo!=null?d.descFundo:null;
+      DB.descontos=Array.isArray(d.descontos)?d.descontos:null;
     }
     localStorage.setItem('cc_bk',JSON.stringify(DB));
     syncBar('ok','✅ sincronizado!');
@@ -800,15 +785,10 @@ function getAptoMonths(){
       for(let i=1;i<=3;i++) set.add(shiftM(m,i));
     }
   });
-  // Garagem: add months until it finishes
-  const dg=getDescGaragem();
-  if(dg&&dg.inicio&&dg.parcelas){
-    const[gy,gm]=dg.inicio.split('-').map(Number);
-    const lastM=addMos(gy,gm,dg.parcelas-1);
-    const[ly,lm]=lastM.split('-').map(Number);
-    const[ty,tm]=[cy,cm];
-    if((ly-ty)*12+(lm-tm)>0) set.add(lastM); // include final month
-  }
+  // Descontos parcelados: include final month in apto range
+  getDescAutomaticos().filter(d=>d.tipo==='parcelado'&&d.inicio&&d.parcelas).forEach(d=>{
+    const lastM=shiftM(d.inicio,d.parcelas-1);set.add(lastM);
+  });
   return [...set].sort();
 }
 function rebuildAllSelects(){
@@ -832,9 +812,7 @@ function rebuildAllSelects(){
   let ah='';ams.forEach(v=>{const[y,m]=v.split('-').map(Number);ah+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
   const asel=document.getElementById('a-month-sel');
   if(asel){const prev=asel.value||TODAY;asel.innerHTML=ah;asel.value=asel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
-  // Descontos garagem select (needs full range)
-  const descGaraEl=document.getElementById('desc-gara-inicio');
-  if(descGaraEl){const prev=descGaraEl.value||'2025-03';descGaraEl.innerHTML=fh;descGaraEl.value=descGaraEl.querySelector(`option[value="${prev}"]`)?prev:'2025-03';}
+  // descontos: sem selects fixos — lista dinâmica no modal
   // Cartão and Ronaldo range selects
   ['c-month-sel','ro-month-sel'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
@@ -852,27 +830,43 @@ function goToday(selId,btnId,fn){document.getElementById(selId).value=TODAY;docu
 
 // ══ APÊ HELPERS ══
 function getDivisao(){return DB.divisao||{duanni:50,alan:50};}
-// Retorna descontos automáticos do aluguel para um dado mês
-function getAluguelDescontos(month){
-  const[ty,tm]=month.split('-').map(Number);
-  const dg=getDescGaragem();
-  const[gy,gm]=dg.inicio.split('-').map(Number);
-  const diff=(ty-gy)*12+(tm-gm);
-  const garagem=(diff>=0&&diff<dg.parcelas)?dg.valor:0;
-  const fundo=getDescFundo();
-  return{garagem,fundo,total:garagem+fundo,diff,dgParcelas:dg.parcelas};
+// Lista de descontos ativos — usa DB.descontos se existir, senão migra formato antigo
+function getDescAutomaticos(){
+  if(DB.descontos)return DB.descontos;
+  // migração automática do formato antigo
+  const list=[];
+  const g=DB.desc_garagem||{valor:109.20,parcelas:24,inicio:'2025-03'};
+  list.push({id:'garagem',nome:'Cobertura da Garagem',tipo:'parcelado',valor:g.valor,parcelas:g.parcelas,inicio:g.inicio});
+  const fv=DB.desc_fundo!=null?DB.desc_fundo:58.45;
+  list.push({id:'fundo',nome:'Fundo de Reserva',tipo:'fixo',valor:fv});
+  return list;
+}
+// Calcula quanto vale um desconto num dado mês
+function calcDescValorMes(dc,month){
+  if(dc.tipo==='fixo')return dc.valor||0;
+  if(dc.tipo==='parcelado'&&dc.inicio&&dc.parcelas){
+    const[ty,tm]=month.split('-').map(Number);
+    const[iy,im]=dc.inicio.split('-').map(Number);
+    const diff=(ty-iy)*12+(tm-im);
+    return(diff>=0&&diff<dc.parcelas)?dc.valor:0;
+  }
+  return 0;
+}
+// Total dos descontos automáticos num mês
+function getTotalDescontos(month){
+  return getDescAutomaticos().reduce((s,dc)=>s+calcDescValorMes(dc,month),0);
 }
 function getAptoCalc(month){
   const d=(DB.apto||{})[month]||{};
   const caixa=d.caixa?.valor||0;
   const aluguelBruto=d.aluguel?.valor||0;
   const descManual=d.aluguel?.desconto||0;
-  const{garagem,fundo}=getAluguelDescontos(month);
-  const aluguelLiq=aluguelBruto-descManual-garagem-fundo;
+  const descAuto=getTotalDescontos(month);
+  const aluguelLiq=aluguelBruto-descManual-descAuto;
   const extras=Object.values(d.extras||{}).reduce((s,v)=>s+(v.valor||0),0);
   const base=caixa-aluguelLiq+extras;
   const div=getDivisao();
-  return{caixa,aluguelBruto,aluguelLiq,descManual,garagem,fundo,extras,base,
+  return{caixa,aluguelBruto,aluguelLiq,descManual,descAuto,extras,base,
     duanniVal:base*(div.duanni||50)/100,alanVal:base*(div.alan||50)/100};
 }
 function getAptoShare(month,person){
@@ -974,8 +968,9 @@ function renderDuanni(){
     const isRec=e.tipo==='rec';
     const parc=isRec?1:(e.parcelas||1);
     const valMes=isRec?e.total:e.total/parc;
-    const stCls=e.status==='pago'?'badge-pago':'badge-pendente';
-    const stLbl=e.status==='pago'?'✅ Pago':'⏳ Pendente';
+    const stMes=(e.statusPorMes&&e.statusPorMes[month])||'pendente';
+    const stCls=stMes==='pago'?'badge-pago':'badge-pendente';
+    const stLbl=stMes==='pago'?'✅ Pago':'⏳ Pendente';
     const banco=e.banco&&BANCOS[e.banco]?`<span class="banco-tag">${BANCOS[e.banco]}</span>`:'<span style="color:var(--rose);font-size:0.76rem;">—</span>';
     return`<tr>
       <td><div class="store-name">${e.desc}</div>${e.obs?`<div class="desc-name">${e.obs}</div>`:''}</td>
@@ -983,7 +978,7 @@ function renderDuanni(){
       <td><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parc>1)?`<div class="value-sub">${fmt(e.total)} · ${diff+1}/${parc}x</div>`:''}</td>
       <td>${FORMAS[e.forma]||e.forma}${isRec?` <span class="badge badge-rec" style="margin-left:3px">🔄</span>`:''}</td>
       <td>${banco}</td>
-      <td><button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}')">${stLbl}</button></td>
+      <td><button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button></td>
       <td><div class="action-btns"><button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button><button class="btn-del" onclick="delPessoal('${e.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
@@ -1122,12 +1117,6 @@ function renderApto(){
   // ALUGUEL card
   const aluguelBruto=d.aluguel?.valor||0;
   const descManual=d.aluguel?.desconto||0;
-  const{garagem,fundo,diff:garaParc,dgParcelas}=getAluguelDescontos(month);
-  const dg=getDescGaragem();
-  const garaAtiva=garagem>0;
-  const garaInfo=garaAtiva
-    ?`🚗 parcela ${garaParc+1}/${dgParcelas} · −${fmt(garagem)}`
-    :`🚗 Garagem: encerrada`;
   const aluguelTitle=d.aluguel?.label||'🏠 Aluguel';
   html+=mkCard('aluguel',aluguelTitle,aluguelBruto?fmt(calc.aluguelLiq):'—','líquido',d.aluguel?.status||'pendente',true,
     `<div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:4px;font-weight:500;">valor bruto</div>
@@ -1135,21 +1124,23 @@ function renderApto(){
      <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin:6px 0 4px;font-weight:500;">desconto manual (R$)</div>
      <input id="ae-aluguel-d" type="number" step="0.01" placeholder="0,00" value="${descManual||''}" style="${IS}">
      <div style="background:var(--cream);border-radius:10px;padding:10px 12px;margin-top:4px;margin-bottom:8px;">
-       <div style="font-size:0.72rem;font-weight:600;color:var(--mocha);margin-bottom:8px;">⚙️ descontos automáticos</div>
-       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;">
-         <span style="font-size:0.75rem;color:var(--dark);">🚗 Garagem (${dg.parcelas}x)</span>
-         <div style="display:flex;align-items:center;gap:5px;">
-           <span style="font-size:0.71rem;color:var(--mocha);">${garaInfo}</span>
-           <input id="ae-gara-val" type="number" step="0.01" value="${dg.valor}" style="width:72px;font-family:'DM Sans',sans-serif;font-size:0.82rem;background:var(--white);border:1px solid var(--blush);border-radius:7px;padding:4px 7px;color:var(--dark);outline:none;text-align:right;">
-         </div>
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+         <span style="font-size:0.72rem;font-weight:600;color:var(--mocha);">⚙️ descontos automáticos</span>
+         <button onclick="openDescModal()" style="background:var(--lav-dark);color:white;border:none;border-radius:8px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-size:0.72rem;cursor:pointer;">✏️ gerenciar</button>
        </div>
-       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-         <span style="font-size:0.75rem;color:var(--dark);">🏢 Fundo de reserva</span>
-         <input id="ae-fundo-val" type="number" step="0.01" value="${getDescFundo()}" style="width:72px;font-family:'DM Sans',sans-serif;font-size:0.82rem;background:var(--white);border:1px solid var(--blush);border-radius:7px;padding:4px 7px;color:var(--dark);outline:none;text-align:right;">
+       ${getDescAutomaticos().map(dc=>`
+         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:6px;">
+           <span style="font-size:0.76rem;color:var(--dark);">${dc.nome}</span>
+           <span style="font-size:0.76rem;font-weight:600;color:#9b5c5c;">−${fmt(calcDescValorMes(dc,month))}</span>
+         </div>`).join('')}
+       ${getDescAutomaticos().length===0?'<div style="font-size:0.74rem;color:var(--rose);font-style:italic;">nenhum desconto cadastrado</div>':''}
+       <div style="border-top:1px solid var(--blush);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;">
+         <span style="font-size:0.74rem;color:var(--mocha);">total descontos</span>
+         <span style="font-size:0.74rem;font-weight:600;color:#9b5c5c;">−${fmt(getDescAutomaticos().reduce((s,dc)=>s+calcDescValorMes(dc,month),0))}</span>
        </div>
      </div>
      <div style="display:flex;gap:6px;">
-       <button onclick="saveAluguelInline()" style="flex:1;background:#7b5ea7;color:white;border:none;border-radius:9px;padding:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;font-weight:500;">💾 salvar tudo</button>
+       <button onclick="saveAluguelInline()" style="flex:1;background:#7b5ea7;color:white;border:none;border-radius:9px;padding:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;font-weight:500;">💾 salvar</button>
        <button onclick="toggleInlineEdit('aluguel-inline')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:9px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;">✕</button>
      </div>`);
   // EXTRA cards
@@ -1198,11 +1189,7 @@ function saveAluguelInline(){
   const desconto=parseFloat(document.getElementById('ae-aluguel-d').value)||0;
   if(!DB.apto[month])DB.apto[month]={};
   DB.apto[month].aluguel={...(DB.apto[month].aluguel||{}),valor,desconto};
-  // Salvar descontos automáticos editáveis
-  const garaEl=document.getElementById('ae-gara-val');
-  const fundoEl=document.getElementById('ae-fundo-val');
-  if(garaEl){const v=parseFloat(garaEl.value);if(!isNaN(v))DB.descGaragem={...getDescGaragem(),valor:v};}
-  if(fundoEl){const v=parseFloat(fundoEl.value);if(!isNaN(v))DB.descFundo=v;}
+
   saveData();renderApto();renderDuanni();renderAlan();toast('✅ Aluguel e descontos salvos!');
 }
 function saveExtraCard(key){
@@ -1262,40 +1249,82 @@ function saveDivisao(){
 }
 
 // ══ MODAL DESCONTOS ══
+let _descItems=[];
 function openDescModal(){
-  const gCfg=DB.desc_garagem||{valor:DESC_GARAGEM.valor,inicio:DESC_GARAGEM.inicio,parcelas:DESC_GARAGEM.parcelas};
-  const fundo=DB.desc_fundo!=null?DB.desc_fundo:DESC_FUNDO;
-  document.getElementById('desc-gara-val').value=gCfg.valor;
-  document.getElementById('desc-gara-parc').value=gCfg.parcelas;
-  document.getElementById('desc-gara-inicio').value=gCfg.inicio;
-  document.getElementById('desc-fundo-val').value=fundo;
-  updateDescGaraStatus();
+  _descItems=(DB.descontos||(()=>{
+    // migração: converter formato antigo para lista nova
+    const list=[];
+    if(DB.desc_garagem||true){
+      const g=DB.desc_garagem||{valor:109.20,parcelas:24,inicio:'2025-03'};
+      list.push({id:'garagem',nome:'Cobertura da Garagem',tipo:'parcelado',valor:g.valor,parcelas:g.parcelas,inicio:g.inicio});
+    }
+    const fv=DB.desc_fundo!=null?DB.desc_fundo:58.45;
+    list.push({id:'fundo',nome:'Fundo de Reserva',tipo:'fixo',valor:fv});
+    return list;
+  })()).map(d=>({...d}));
+  renderDescLista();
   document.getElementById('ov-desc').classList.add('active');
 }
 function closeDescModal(){document.getElementById('ov-desc').classList.remove('active');}
-function updateDescGaraStatus(){
-  const inicio=document.getElementById('desc-gara-inicio').value;
-  const parc=parseInt(document.getElementById('desc-gara-parc').value)||0;
-  if(!inicio||!parc){document.getElementById('desc-gara-status').textContent='';return;}
-  const[iy,im]=inicio.split('-').map(Number);
-  const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
-  const diff=(cy-iy)*12+(cm-im);
-  const parcAtual=Math.max(1,diff+1);
-  const fim=shiftM(inicio,parc-1);
-  const ativa=diff>=0&&diff<parc;
-  document.getElementById('desc-gara-status').innerHTML=ativa
-    ?`✅ parcela <strong>${parcAtual}/${parc}</strong> (termina ${getML(fim)})`
-    :`${diff<0?'⏳ começa em '+getML(inicio):'✅ encerrada em '+getML(fim)}`;
+function renderDescLista(){
+  const IS='font-family:\'DM Sans\',sans-serif;font-size:0.87rem;background:var(--white);border:1.5px solid var(--blush);border-radius:8px;padding:6px 10px;color:var(--dark);outline:none;width:100%;';
+  const lista=document.getElementById('desc-lista');
+  if(!lista)return;
+  lista.innerHTML=_descItems.length===0
+    ?'<div style="font-size:0.82rem;color:var(--rose);font-style:italic;text-align:center;padding:12px;">nenhum desconto cadastrado</div>'
+    :_descItems.map((d,i)=>{
+    const tipo=d.tipo||'fixo';
+    let parcInfo='';
+    if(tipo==='parcelado'&&d.inicio&&d.parcelas){
+      const[iy,im]=d.inicio.split('-').map(Number);
+      const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
+      const diff=(cy-iy)*12+(cm-im);
+      const fim=shiftM(d.inicio,d.parcelas-1);
+      if(diff<0)parcInfo=`⏳ começa ${getML(d.inicio)}`;
+      else if(diff>=d.parcelas)parcInfo=`✅ encerrada ${getML(fim)}`;
+      else parcInfo=`✅ ${diff+1}/${d.parcelas} · termina ${getML(fim)}`;
+    }
+    return`<div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid var(--blush);">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input type="text" value="${d.nome||''}" placeholder="nome do desconto" oninput="_descItems[${i}].nome=this.value"
+          style="${IS}">
+        <button onclick="delDescItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:1rem;padding:4px 8px;border-radius:7px;flex-shrink:0;" onmouseover="this.style.background='#fce8e8'" onmouseout="this.style.background='none'">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:${tipo==='parcelado'?'8':'0'}px;">
+        <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">tipo</div>
+          <select onchange="_descItems[${i}].tipo=this.value;renderDescLista()" style="${IS}">
+            <option value="fixo"${tipo==='fixo'?' selected':''}>🔄 fixo (todo mês)</option>
+            <option value="parcelado"${tipo==='parcelado'?' selected':''}>📅 parcelado (com fim)</option>
+          </select>
+        </div>
+        <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">valor (R$)</div>
+          <input type="number" step="0.01" value="${d.valor||''}" placeholder="0,00" oninput="_descItems[${i}].valor=parseFloat(this.value)||0" style="${IS}">
+        </div>
+      </div>
+      ${tipo==='parcelado'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">mês início</div>
+          <input type="month" value="${d.inicio||TODAY}" oninput="_descItems[${i}].inicio=this.value;renderDescLista()" style="${IS}">
+        </div>
+        <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">nº parcelas</div>
+          <input type="number" min="1" value="${d.parcelas||''}" placeholder="ex: 24" oninput="_descItems[${i}].parcelas=parseInt(this.value)||0;renderDescLista()" style="${IS}">
+        </div>
+      </div>
+      ${parcInfo?`<div style="font-size:0.73rem;color:#4a6044;margin-top:6px;padding:4px 8px;background:var(--sage-light);border-radius:8px;">${parcInfo}</div>`:''}`:``}
+    </div>`;
+  }).join('');
+}
+function addDescItem(){
+  _descItems.push({id:'desc_'+Date.now(),nome:'',tipo:'fixo',valor:0});
+  renderDescLista();
+}
+function delDescItem(i){
+  _descItems.splice(i,1);renderDescLista();
 }
 function saveDescModal(){
-  const gVal=parseFloat(document.getElementById('desc-gara-val').value);
-  const gParc=parseInt(document.getElementById('desc-gara-parc').value);
-  const gInicio=document.getElementById('desc-gara-inicio').value;
-  const fVal=parseFloat(document.getElementById('desc-fundo-val').value);
-  if(isNaN(gVal)||!gParc||!gInicio||isNaN(fVal)){toast('⚠️ preencha todos os campos!');return;}
-  DB.desc_garagem={valor:gVal,parcelas:gParc,inicio:gInicio};
-  DB.desc_fundo=fVal;
-  closeDescModal();saveData();renderApto();toast('✅ descontos atualizados!');
+  const incompletos=_descItems.filter(d=>!d.nome||!(d.valor>0));
+  if(incompletos.length>0){toast('⚠️ preencha nome e valor de todos os descontos!');return;}
+  DB.descontos=_descItems.map(d=>({...d}));
+  closeDescModal();saveData();renderApto();renderDuanni();renderAlan();toast('✅ descontos salvos!');
 }
 
 // ══ CLARO ══
@@ -1411,7 +1440,9 @@ function openPessoalModal(id=null){
     document.getElementById('pm-total').value=e.total;
     document.getElementById('pm-forma').value=e.forma||'credito';
     document.getElementById('pm-banco').value=e.banco||'';
-    document.getElementById('pm-status').value=e.status||'pendente';
+    const curMonth=document.getElementById('d-month-sel')?.value||'';
+    const stForMonth=(e.statusPorMes&&curMonth&&e.statusPorMes[curMonth])||'pendente';
+    document.getElementById('pm-status').value=stForMonth;
     document.getElementById('pm-obs').value=e.obs||'';
     if(e.tipo==='rec'){setPMType('rec');document.getElementById('pm-rec-inicio').value=e.mesInicio||TODAY;}
     else{setPMType('parc');document.getElementById('pm-parcelas').value=e.parcelas||1;document.getElementById('pm-mes-compra').value=e.mesInicio||TODAY;}
@@ -1439,12 +1470,30 @@ function savePessoalExpense(){
     categoria:document.getElementById('pm-cat').value,
     forma:document.getElementById('pm-forma').value,
     banco:document.getElementById('pm-banco').value,
-    status:document.getElementById('pm-status').value,
     parcelas:parcelasPM,mesInicio:mesInicioPM,
     obs:document.getElementById('pm-obs').value.trim()};
+  // status fica SOMENTE em statusPorMes[mes], nunca global
   if(!DB.pessoal)DB.pessoal=[];
-  if(pmEditId){const idx=DB.pessoal.findIndex(x=>x.id===pmEditId);if(idx>-1)DB.pessoal[idx]={...DB.pessoal[idx],...obj};toast('✅ atualizada!');}
-  else{DB.pessoal.push({id:Date.now().toString(),...obj});toast('✅ adicionada!');}
+  if(pmEditId){
+    const idx=DB.pessoal.findIndex(x=>x.id===pmEditId);
+    if(idx>-1){
+      // preserve statusPorMes — only update current month status
+      const curMonth=document.getElementById('d-month-sel')?.value||'';
+      const novoStatus=document.getElementById('pm-status').value;
+      const prevStatusPorMes=DB.pessoal[idx].statusPorMes||{};
+      if(curMonth)prevStatusPorMes[curMonth]=novoStatus;
+      DB.pessoal[idx]={...DB.pessoal[idx],...obj,statusPorMes:prevStatusPorMes};
+    }
+    toast('✅ atualizada!');
+  }else{
+    // new expense: set status for the selected month only
+    const curMonth=document.getElementById('d-month-sel')?.value||mesInicioPM;
+    const novoStatus=document.getElementById('pm-status').value;
+    const statusPorMes={};
+    if(curMonth)statusPorMes[curMonth]=novoStatus;
+    DB.pessoal.push({id:Date.now().toString(),...obj,statusPorMes});
+    toast('✅ adicionada!');
+  }
   saveData();document.getElementById('ov-pessoal').classList.remove('active');pmEditId=null;
   rebuildAllSelects();renderDuanni();
 }
@@ -1453,10 +1502,13 @@ function delPessoal(id){
   DB.pessoal=(DB.pessoal||[]).filter(e=>e.id!==id);
   saveData();toast('🗑️ removida!');rebuildAllSelects();renderDuanni();
 }
-function togglePessoalStatus(id){
+function togglePessoalStatus(id,month){
   const e=(DB.pessoal||[]).find(x=>x.id===id);if(!e)return;
-  e.status=e.status==='pago'?'pendente':'pago';
-  saveData();renderDuanni();toast(e.status==='pago'?'✅ pago!':'↩ pendente');
+  if(!e.statusPorMes)e.statusPorMes={};
+  // status base só usado quando não há statusPorMes
+  const cur=e.statusPorMes[month]||'pendente';
+  e.statusPorMes[month]=cur==='pago'?'pendente':'pago';
+  saveData();renderDuanni();toast(e.statusPorMes[month]==='pago'?'✅ pago!':'↩ pendente');
 }
 
 // ══ RENDER ALL ══
