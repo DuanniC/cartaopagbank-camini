@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ Financeiro</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --cream:#faf7f2;--blush:#f2e8e0;--rose:#d4a5a5;
@@ -94,11 +94,12 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .banner .b-sub{font-size:0.76rem;opacity:0.85;margin-top:4px;letter-spacing:0.01em;}
 
 /* ── fonte numérica SF Pro (iPhone) ── */
-:root{--font-num:-apple-system,'SF Pro Display','SF Pro Text',ui-sans-serif,'Helvetica Neue',system-ui,sans-serif;}
+:root{--font-num:'Bodoni Moda','Playfair Display',Georgia,serif;}
 .num,.value-bold,.value-sub,.badge-parc,.badge-rec,.badge-pago,.badge-pendente{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
-.banner .b-total{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
-.bc-value{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.015em;}
-.p-total{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.015em;}
+/* valores grandes: Playfair Display mantém presença visual */
+.banner .b-total{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
+.bc-value{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
+.p-total{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
 .btn-status-toggle{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
 
 /* BREAKDOWN CARDS */
