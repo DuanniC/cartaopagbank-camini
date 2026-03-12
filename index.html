@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ Financeiro</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --cream:#faf7f2;--blush:#f2e8e0;--rose:#d4a5a5;
@@ -93,28 +93,31 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .banner .b-month{font-family:'Playfair Display',serif;font-size:0.9rem;font-style:italic;opacity:0.85;}
 .banner .b-sub{font-size:0.76rem;opacity:0.85;margin-top:4px;letter-spacing:0.01em;}
 
+/* ── fonte numérica (grotesca geométrica estilo Gorga) ── */
+:root{--font-num:'Plus Jakarta Sans','DM Sans',sans-serif;}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
+.value-bold,.value-sub{font-family:var(--font-num);}
+.badge-parc,.badge-rec,.badge-pago,.badge-pendente,.btn-status-toggle{font-family:var(--font-num);}
+.banner .b-total{font-family:var(--font-num)!important;font-weight:700;letter-spacing:-0.02em;}
+.bc-value{font-family:var(--font-num)!important;font-weight:700;letter-spacing:-0.01em;}
+.p-total{font-family:var(--font-num)!important;font-weight:700;letter-spacing:-0.01em;}
+
 /* ── fonte numérica SF Pro (iPhone) ── */
-:root{--font-num:'Bodoni Moda','Playfair Display',Georgia,serif;}
-.num,.value-bold,.value-sub,.badge-parc,.badge-rec,.badge-pago,.badge-pendente{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
-/* valores grandes: Playfair Display mantém presença visual */
-.banner .b-total{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
-.bc-value{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
-.p-total{font-family:'Bodoni Moda','Playfair Display',Georgia,serif!important;font-variant-numeric:tabular-nums;}
-.btn-status-toggle{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
+
 
 /* BREAKDOWN CARDS */
 .breakdown-grid{display:grid;gap:13px;margin-bottom:22px;}
 .breakdown-grid.cols3{grid-template-columns:repeat(3,1fr);}
 .breakdown-grid.cols2{grid-template-columns:repeat(2,1fr);}
 .bc{background:var(--white);border-radius:16px;padding:18px 20px;box-shadow:0 3px 14px var(--shadow);}
-.bc-icon{font-size:1.3rem;margin-bottom:6px;}
-.bc-label{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:3px;}
-.bc-value{font-size:1.35rem;font-weight:600;color:var(--dark);}
-.bc-sub{font-size:0.74rem;color:var(--mocha);margin-top:2px;font-style:italic;}
+.bc-icon{font-size:1.5rem;margin-bottom:7px;}
+.bc-label{font-size:0.73rem;letter-spacing:0.09em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:4px;}
+.bc-value{font-size:1.55rem;font-weight:700;color:var(--dark);}
+.bc-sub{font-size:0.78rem;color:var(--mocha);margin-top:3px;font-style:italic;}
 
 /* SUMMARY CARDS */
 .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px;}
-.summary-card{background:var(--white);border-radius:16px;padding:18px 20px;box-shadow:0 3px 14px var(--shadow);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;}
+.summary-card{background:var(--white);border-radius:16px;padding:26px 22px;box-shadow:0 3px 14px var(--shadow);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;text-align:center;}
 .summary-card:hover{transform:translateY(-2px);box-shadow:0 6px 22px var(--shadow-md);}
 .summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
 .card-duanni::before{background:linear-gradient(90deg,#d4a5a5,#e8c4b8);}
@@ -122,11 +125,11 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .card-ronaldo::before{background:linear-gradient(90deg,#b8a08a,#d4c0a8);}
 .card-sueli::before{background:linear-gradient(90deg,#c4a8c0,#d8c4d4);}
 .summary-card.active-filter{box-shadow:0 0 0 3px var(--rose),0 6px 22px var(--shadow-md);transform:translateY(-2px);}
-.p-emoji{font-size:1.3rem;margin-bottom:5px;display:block;}
-.p-name{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:3px;}
-.p-total{font-size:1.3rem;color:var(--dark);font-weight:600;}
-.p-total span{font-size:0.8rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--rose);}
-.card-hint{font-size:0.65rem;color:var(--rose);margin-top:3px;opacity:0;transition:opacity 0.2s;}
+.p-emoji{font-size:2rem;margin-bottom:10px;display:block;}
+.p-name{font-size:0.82rem;letter-spacing:0.09em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:10px;}
+.p-total{font-size:1.7rem;color:var(--dark);font-weight:600;}
+.p-total span{font-size:0.9rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--rose);}
+.card-hint{font-size:0.7rem;color:var(--rose);margin-top:6px;opacity:0;transition:opacity 0.2s;text-align:center;}
 .summary-card:hover .card-hint{opacity:1;}
 
 /* TABLE */
@@ -665,7 +668,7 @@ const TODAY=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 function addMos(y,m,n){let ny=y,nm=m+n;while(nm>12){nm-=12;ny++;}while(nm<1){nm+=12;ny--;}return`${ny}-${String(nm).padStart(2,'0')}`;}
 function shiftM(ym,n){const[y,m]=ym.split('-').map(Number);return addMos(y,m,n);}
 function getML(v){if(!v)return'—';const[y,m]=v.split('-').map(Number);return`${MN[m-1]} ${y}`;}
-function fmt(v){const n=Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});return'R$ <span class="num">'+n+'</span>';}
+function fmt(v){return'<span class="num">R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span>';}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
@@ -928,8 +931,8 @@ function renderCartao(){
   tbody.innerHTML=sorted.map(e=>{
     const p=getInfo(e,month);
     const tags=(e.payers||[]).map(pp=>`<span class="person-tag ${PC[pp].tag}">${PC[pp].emoji} ${PC[pp].label}</span>`).join('');
-    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num}</span> de <span class="num">${p.total}x</span></span>`;
-    let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>`${PC[pp].emoji} <strong>${fmt(e.customSplit[pp]||0)}</strong>`).join('<br>');
+    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
+    let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>`${PC[pp].emoji} ${fmt(e.customSplit[pp]||0)}`).join('<br>');
     return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td>
       <td>${badge}</td><td><div class="value-bold">${fmt(e.total)}</div></td>
       <td><div class="value-sub">${fmt(p.value)}</div></td>
@@ -1024,7 +1027,7 @@ function renderRonaldo(){
     const p=getInfo(e,month);
     const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit['ronaldo']||0):p.value/((e.payers||[]).length||1);
     tot+=share;
-    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num}</span> de <span class="num">${p.total}x</span></span>`;
+    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
     return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td><td>${badge}</td><td><div class="value-sub">${fmt(share)}</div></td></tr>`;
   }).join('');
   foot.style.display='';
@@ -1082,7 +1085,7 @@ function renderApto(){
   // Banner
   document.getElementById('a-resultado').innerHTML=fmt(calc.duanniVal);
   document.getElementById('a-resultado-sub').textContent=
-    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão <span class="num">${div.duanni}%</span> / <span class="num">${div.alan}%</span>`;
+    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão ${div.duanni}% / ${div.alan}%`;
   // Build cards
   const IS='width:100%;font-family:\'DM Sans\',sans-serif;font-size:0.88rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:7px 11px;color:var(--dark);outline:none;margin-bottom:5px;';
   function mkCard(key,title,valDisplay,sublabel,status,canDel,editBody,isExtra){
@@ -1245,7 +1248,7 @@ function updateDivPreview(){
   const calc=getAptoCalc(document.getElementById('a-month-sel').value);
   const prev=document.getElementById('div-preview');
   if(d+a===100&&calc.base){
-    prev.innerHTML=`🌸 Duanni: <strong>${fmt(calc.base*d/100)}</strong> &nbsp;·&nbsp; ⚡ Alan: <strong>${fmt(calc.base*a/100)}</strong> &nbsp;·&nbsp; <span class="num">${d}%</span>/<span class="num">${a}%</span>`;
+    prev.innerHTML=`🌸 Duanni: <strong>${fmt(calc.base*d/100)}</strong> &nbsp;·&nbsp; ⚡ Alan: <strong>${fmt(calc.base*a/100)}</strong>`;
   }else if(d+a!==100){prev.innerHTML=`⚠️ soma: ${d+a}% (deve ser 100%)`;}
   else{prev.innerHTML='—';}
 }
