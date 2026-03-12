@@ -89,9 +89,17 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .banner.sage{background:linear-gradient(135deg,#5a7a52,#8aaa82);box-shadow:0 5px 20px rgba(90,122,82,0.2);}
 .banner.ron{background:linear-gradient(135deg,#7a5535,#b8896e);box-shadow:0 5px 20px rgba(122,85,53,0.22);}
 .banner .b-label{font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;opacity:0.82;margin-bottom:2px;}
-.banner .b-total{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;}
+.banner .b-total{font-size:1.8rem;font-weight:600;}
 .banner .b-month{font-family:'Playfair Display',serif;font-size:0.9rem;font-style:italic;opacity:0.85;}
 .banner .b-sub{font-size:0.76rem;opacity:0.85;margin-top:4px;letter-spacing:0.01em;}
+
+/* ── fonte numérica SF Pro (iPhone) ── */
+:root{--font-num:-apple-system,'SF Pro Display','SF Pro Text',ui-sans-serif,'Helvetica Neue',system-ui,sans-serif;}
+.num,.value-bold,.value-sub,.badge-parc,.badge-rec,.badge-pago,.badge-pendente{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
+.banner .b-total{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+.bc-value{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.015em;}
+.p-total{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;letter-spacing:-0.015em;}
+.btn-status-toggle{font-family:var(--font-num);font-variant-numeric:tabular-nums;}
 
 /* BREAKDOWN CARDS */
 .breakdown-grid{display:grid;gap:13px;margin-bottom:22px;}
@@ -100,7 +108,7 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .bc{background:var(--white);border-radius:16px;padding:18px 20px;box-shadow:0 3px 14px var(--shadow);}
 .bc-icon{font-size:1.3rem;margin-bottom:6px;}
 .bc-label{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:3px;}
-.bc-value{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;color:var(--dark);}
+.bc-value{font-size:1.35rem;font-weight:600;color:var(--dark);}
 .bc-sub{font-size:0.74rem;color:var(--mocha);margin-top:2px;font-style:italic;}
 
 /* SUMMARY CARDS */
@@ -115,7 +123,7 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .summary-card.active-filter{box-shadow:0 0 0 3px var(--rose),0 6px 22px var(--shadow-md);transform:translateY(-2px);}
 .p-emoji{font-size:1.3rem;margin-bottom:5px;display:block;}
 .p-name{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:3px;}
-.p-total{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dark);font-weight:600;}
+.p-total{font-size:1.3rem;color:var(--dark);font-weight:600;}
 .p-total span{font-size:0.8rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--rose);}
 .card-hint{font-size:0.65rem;color:var(--rose);margin-top:3px;opacity:0;transition:opacity 0.2s;}
 .summary-card:hover .card-hint{opacity:1;}
@@ -656,7 +664,7 @@ const TODAY=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 function addMos(y,m,n){let ny=y,nm=m+n;while(nm>12){nm-=12;ny++;}while(nm<1){nm+=12;ny--;}return`${ny}-${String(nm).padStart(2,'0')}`;}
 function shiftM(ym,n){const[y,m]=ym.split('-').map(Number);return addMos(y,m,n);}
 function getML(v){if(!v)return'—';const[y,m]=v.split('-').map(Number);return`${MN[m-1]} ${y}`;}
-function fmt(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt(v){const n=Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});return'R$ <span class="num">'+n+'</span>';}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
@@ -911,7 +919,7 @@ function renderCartao(){
     (e.payers||[]).forEach(pp=>{const s=e.splitMode==='custom'&&e.customSplit?(e.customSplit[pp]||0):p.value/(e.payers||[]).length;totals[pp]=(totals[pp]||0)+s;});
   });
   Object.keys(totals).forEach(p=>{const el=document.getElementById('total-'+p);if(el)el.innerHTML=`${fmt(totals[p])} <span>/mês</span>`;});
-  document.getElementById('c-fat-total').textContent=fmt(personFilter?totals[personFilter]:fat);
+  document.getElementById('c-fat-total').innerHTML=fmt(personFilter?totals[personFilter]:fat);
   document.getElementById('c-fat-label').textContent=personFilter?`💸 total de ${PC[personFilter].label}`:'💸 fatura total do mês';
   document.getElementById('c-table-title').textContent=personFilter?`${PC[personFilter].emoji} despesas de ${PC[personFilter].label}`:'✨ despesas do mês';
   const tbody=document.getElementById('cartao-table');
@@ -919,7 +927,7 @@ function renderCartao(){
   tbody.innerHTML=sorted.map(e=>{
     const p=getInfo(e,month);
     const tags=(e.payers||[]).map(pp=>`<span class="person-tag ${PC[pp].tag}">${PC[pp].emoji} ${PC[pp].label}</span>`).join('');
-    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc">${p.num} de ${p.total}x</span>`;
+    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num}</span> de <span class="num">${p.total}x</span></span>`;
     let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>`${PC[pp].emoji} <strong>${fmt(e.customSplit[pp]||0)}</strong>`).join('<br>');
     return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td>
       <td>${badge}</td><td><div class="value-bold">${fmt(e.total)}</div></td>
@@ -945,7 +953,7 @@ function renderDuanni(){
   const cartaoVal=getPersonCartaoTotal('duanni',month);
   const aptoVal=getAptoShare(month,'duanni');
   const div=getDivisao();
-  document.getElementById('d-apto-sub').textContent=`${div.duanni||50}% da divisão`;
+  document.getElementById('d-apto-sub').innerHTML=`<span class="num">${div.duanni||50}%</span> da divisão`;
   const pessoal=(DB.pessoal||[]).filter(e=>{
     if(!e.mesInicio)return false;
     const[iy,im]=e.mesInicio.split('-').map(Number);
@@ -954,10 +962,10 @@ function renderDuanni(){
     return e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
   });
   const pessoalVal=pessoal.reduce((s,e)=>s+(e.tipo==='rec'?e.total:e.total/(e.parcelas||1)),0);
-  document.getElementById('d-cartao-val').textContent=fmt(cartaoVal);
-  document.getElementById('d-apto-val').textContent=fmt(aptoVal);
-  document.getElementById('d-pessoal-val').textContent=fmt(pessoalVal);
-  document.getElementById('d-total').textContent=fmt(cartaoVal+aptoVal+pessoalVal);
+  document.getElementById('d-cartao-val').innerHTML=fmt(cartaoVal);
+  document.getElementById('d-apto-val').innerHTML=fmt(aptoVal);
+  document.getElementById('d-pessoal-val').innerHTML=fmt(pessoalVal);
+  document.getElementById('d-total').innerHTML=fmt(cartaoVal+aptoVal+pessoalVal);
   const tbody=document.getElementById('pessoal-table');
   document.getElementById('pessoal-empty').style.display=pessoal.length?'none':'block';
   tbody.innerHTML=pessoal.map(e=>{
@@ -975,7 +983,7 @@ function renderDuanni(){
     return`<tr>
       <td><div class="store-name">${e.desc}</div>${e.obs?`<div class="desc-name">${e.obs}</div>`:''}</td>
       <td><span class="cat-tag ${cat.cls}">${cat.label}</span></td>
-      <td><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parc>1)?`<div class="value-sub">${fmt(e.total)} · ${diff+1}/${parc}x</div>`:''}</td>
+      <td><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parc>1)?`<div class="value-sub">${fmt(e.total)} · <span class="num">${diff+1}/${parc}x</span></div>`:''}</td>
       <td>${FORMAS[e.forma]||e.forma}${isRec?` <span class="badge badge-rec" style="margin-left:3px">🔄</span>`:''}</td>
       <td>${banco}</td>
       <td><button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button></td>
@@ -992,10 +1000,10 @@ function renderAlan(){
   const cartaoVal=getPersonCartaoTotal('alan',month);
   const aptoVal=getAptoShare(month,'alan');
   const div=getDivisao();
-  const sub=document.getElementById('al-apto-sub');if(sub)sub.textContent=`${div.alan||50}% da divisão`;
-  document.getElementById('al-cartao-val').textContent=fmt(cartaoVal);
-  document.getElementById('al-apto-val').textContent=fmt(aptoVal);
-  document.getElementById('al-total').textContent=fmt(cartaoVal+aptoVal);
+  const sub=document.getElementById('al-apto-sub');if(sub)sub.innerHTML=`<span class="num">${div.alan||50}%</span> da divisão`;
+  document.getElementById('al-cartao-val').innerHTML=fmt(cartaoVal);
+  document.getElementById('al-apto-val').innerHTML=fmt(aptoVal);
+  document.getElementById('al-total').innerHTML=fmt(cartaoVal+aptoVal);
 }
 
 // ══ RENDER RONALDO ══
@@ -1004,23 +1012,23 @@ function renderRonaldo(){
   document.getElementById('ro-btn-today').classList.toggle('visible',month!==TODAY);
   document.getElementById('ro-month-lbl').textContent=getML(month);
   const claroVal=DB.claro||0;
-  document.getElementById('ro-claro-val').textContent=fmt(claroVal);
+  document.getElementById('ro-claro-val').innerHTML=fmt(claroVal);
   if(DB.claro)document.getElementById('claro-input').value=DB.claro;
   const active=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.payers||[]).includes('ronaldo'));
   const foot=document.getElementById('ro-cartao-foot');
   document.getElementById('ro-cartao-empty').style.display=active.length?'none':'block';
-  if(!active.length){document.getElementById('ro-cartao-table').innerHTML='';foot.style.display='none';document.getElementById('ro-total').textContent=fmt(claroVal);return;}
+  if(!active.length){document.getElementById('ro-cartao-table').innerHTML='';foot.style.display='none';document.getElementById('ro-total').innerHTML=fmt(claroVal);return;}
   let tot=0;
   document.getElementById('ro-cartao-table').innerHTML=active.map(e=>{
     const p=getInfo(e,month);
     const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit['ronaldo']||0):p.value/((e.payers||[]).length||1);
     tot+=share;
-    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc">${p.num} de ${p.total}x</span>`;
+    const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num}</span> de <span class="num">${p.total}x</span></span>`;
     return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td><td>${badge}</td><td><div class="value-sub">${fmt(share)}</div></td></tr>`;
   }).join('');
   foot.style.display='';
-  document.getElementById('ro-cartao-total').textContent=fmt(tot);
-  document.getElementById('ro-total').textContent=fmt(tot+claroVal);
+  document.getElementById('ro-cartao-total').innerHTML=fmt(tot);
+  document.getElementById('ro-total').innerHTML=fmt(tot+claroVal);
 }
 
 // ══ APÊ RENAME ══
@@ -1071,9 +1079,9 @@ function renderApto(){
   const calc=getAptoCalc(month);
   const div=getDivisao();
   // Banner
-  document.getElementById('a-resultado').textContent=fmt(calc.duanniVal);
+  document.getElementById('a-resultado').innerHTML=fmt(calc.duanniVal);
   document.getElementById('a-resultado-sub').textContent=
-    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão ${div.duanni}% / ${div.alan}%`;
+    `🌸 Duanni ${fmt(calc.duanniVal)}  ·  ⚡ Alan ${fmt(calc.alanVal)}  ·  divisão <span class="num">${div.duanni}%</span> / <span class="num">${div.alan}%</span>`;
   // Build cards
   const IS='width:100%;font-family:\'DM Sans\',sans-serif;font-size:0.88rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:7px 11px;color:var(--dark);outline:none;margin-bottom:5px;';
   function mkCard(key,title,valDisplay,sublabel,status,canDel,editBody,isExtra){
@@ -1236,7 +1244,7 @@ function updateDivPreview(){
   const calc=getAptoCalc(document.getElementById('a-month-sel').value);
   const prev=document.getElementById('div-preview');
   if(d+a===100&&calc.base){
-    prev.innerHTML=`🌸 Duanni: <strong>${fmt(calc.base*d/100)}</strong> &nbsp;·&nbsp; ⚡ Alan: <strong>${fmt(calc.base*a/100)}</strong>`;
+    prev.innerHTML=`🌸 Duanni: <strong>${fmt(calc.base*d/100)}</strong> &nbsp;·&nbsp; ⚡ Alan: <strong>${fmt(calc.base*a/100)}</strong> &nbsp;·&nbsp; <span class="num">${d}%</span>/<span class="num">${a}%</span>`;
   }else if(d+a!==100){prev.innerHTML=`⚠️ soma: ${d+a}% (deve ser 100%)`;}
   else{prev.innerHTML='—';}
 }
