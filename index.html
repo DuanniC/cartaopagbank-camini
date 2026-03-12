@@ -482,59 +482,26 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-
-    <!-- CAIXA CARD compacto -->
-    <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;">
-      <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
-        <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🏦 Caixa</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button class="apto-status-badge" id="caixa-status-btn" onclick="toggleAptoStatus('caixa')">⏳ Pendente</button>
-          <button class="btn-edit-apto" onclick="toggleAptoEdit('caixa')">✏️</button>
-        </div>
-      </div>
-      <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:0.78rem;color:var(--mocha);">parcela</span>
-        <span id="caixa-total-display" style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:var(--dark);">—</span>
-      </div>
-      <div class="apto-edit-panel" id="caixa-edit" style="border-top:1px solid var(--blush);">
-        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
-          <div class="ae-group"><label>💰 valor (R$)</label><input id="ae-caixa-valor" type="number" step="0.01" placeholder="ex: 1250,00"></div>
-          <div class="ae-group"><label>📝 obs (opcional)</label><input id="ae-caixa-obs" type="text" placeholder="ex: parcela 24/360"></div>
-          <div style="display:flex;gap:7px;margin-top:2px;">
-            <button class="ae-save" style="flex:1" onclick="saveAptoItem('caixa')">💾 salvar</button>
-            <button class="ae-cancel" onclick="toggleAptoEdit('caixa')">✕</button>
-          </div>
+    <!-- cards dinâmicos renderizados por JS -->
+    <div id="apto-cards-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+    <div style="margin-top:12px;">
+      <button onclick="openAddAptoCard()" style="background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:14px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;width:100%;font-weight:500;transition:background 0.2s;">+ adicionar item (água, luz, telefone...)</button>
+    </div>
+    <!-- modal add card -->
+    <div id="apto-add-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,43,31,0.4);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;">
+      <div style="background:var(--white);border-radius:22px;padding:26px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(61,43,31,0.2);animation:slideUp 0.3s cubic-bezier(.16,1,.3,1);">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--mocha);margin-bottom:18px;">+ novo item</h3>
+        <div class="ae-group" style="margin-bottom:12px;"><label>📝 nome do item</label><input id="new-card-label" type="text" placeholder="ex: Água, Luz, Internet..." style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
+        <div class="ae-group" style="margin-bottom:18px;"><label>💰 valor (R$)</label><input id="new-card-valor" type="number" step="0.01" placeholder="0,00" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="closeAddAptoCard()" style="background:var(--blush);color:var(--mocha);border:none;border-radius:11px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;">cancelar</button>
+          <button onclick="confirmAddAptoCard()" style="flex:1;background:var(--dark);color:white;border:none;border-radius:11px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;font-weight:500;">💾 adicionar</button>
         </div>
       </div>
     </div>
-
-    <!-- ALUGUEL CARD compacto -->
-    <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;">
-      <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
-        <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🏠 Aluguel</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button class="apto-status-badge" id="aluguel-status-btn" onclick="toggleAptoStatus('aluguel')">⏳ Pendente</button>
-          <button class="btn-edit-apto" onclick="toggleAptoEdit('aluguel')">✏️</button>
-        </div>
-      </div>
-      <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:0.78rem;color:var(--mocha);">líquido</span>
-        <span id="aluguel-total-display" style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:var(--dark);">—</span>
-      </div>
-      <div class="apto-edit-panel" id="aluguel-edit" style="border-top:1px solid var(--blush);">
-        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
-          <div class="ae-group"><label>💰 valor bruto (R$)</label><input id="ae-aluguel-valor" type="number" step="0.01" placeholder="ex: 1800,00"></div>
-          <div class="ae-group"><label>💸 desconto (R$)</label><input id="ae-aluguel-desconto" type="number" step="0.01" placeholder="ex: 200,00"></div>
-          <div style="display:flex;gap:7px;margin-top:2px;">
-            <button class="ae-save" style="flex:1;background:#7b5ea7" onclick="saveAptoItem('aluguel')">💾 salvar</button>
-            <button class="ae-cancel" onclick="toggleAptoEdit('aluguel')">✕</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    </div>
+    <!-- hidden inputs still needed for caixa/aluguel save -->
+    <input id="ae-caixa-valor" type="hidden"><input id="ae-caixa-obs" type="hidden">
+    <input id="ae-aluguel-valor" type="hidden"><input id="ae-aluguel-desconto" type="hidden">
   </main>
 </div>
 
@@ -641,11 +608,22 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
         </select>
       </div>
     </div>
-    <div class="form-grid">
-      <div class="form-row"><label>🔢 parcelas</label><input id="pm-parcelas" type="number" min="1" placeholder="1 = à vista"></div>
-      <div class="form-row"><label>🗓️ mês da compra</label><select id="pm-mes-compra"></select></div>
+    <div class="form-row"><label>🔁 tipo</label>
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="pm-type-parc" onclick="setPMType('parc')">💳 parcelado / à vista</button>
+        <button class="toggle-btn" id="pm-type-rec" onclick="setPMType('rec')">🔄 mensal fixo</button>
+      </div>
     </div>
-    <div class="form-row"><label>📝 observação (opcional)</label><input id="pm-obs" type="text" placeholder="ex: presente do João"></div>
+    <div id="pm-parc-fields">
+      <div class="form-grid">
+        <div class="form-row"><label>🔢 parcelas</label><input id="pm-parcelas" type="number" min="1" placeholder="1 = à vista"></div>
+        <div class="form-row"><label>🗓️ mês da compra</label><select id="pm-mes-compra"></select></div>
+      </div>
+    </div>
+    <div id="pm-rec-fields" style="display:none">
+      <div class="form-row"><label>📆 a partir de</label><select id="pm-rec-inicio"></select></div>
+    </div>
+    <div class="form-row"><label>📝 observação (opcional)</label><input id="pm-obs" type="text" placeholder="ex: Netflix, Spotify..."></div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closePessoalModal()">cancelar</button>
       <button class="btn-modal-save btn-lav" onclick="savePessoalExpense()">💾 salvar</button>
@@ -836,7 +814,7 @@ function getCartaoRange(){
 }
 function rebuildAllSelects(){
   const{h,hf}=buildMonthOpts();
-  ['d-month-sel','al-month-sel','ro-month-sel','a-month-sel','pm-mes-compra'].forEach(id=>{
+  ['d-month-sel','al-month-sel','ro-month-sel','a-month-sel','pm-mes-compra','pm-rec-inicio'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     const prev=el.value||TODAY;el.innerHTML=h;
     el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
@@ -953,9 +931,10 @@ function renderDuanni(){
     const[iy,im]=e.mesInicio.split('-').map(Number);
     const[ty,tm]=month.split('-').map(Number);
     const diff=(ty-iy)*12+(tm-im);
+    if(e.tipo==='rec') return diff>=0;
     return diff>=0&&diff<(e.parcelas||1);
   });
-  let pessoalVal=0;pessoal.forEach(e=>pessoalVal+=e.total/(e.parcelas||1));
+  let pessoalVal=0;pessoal.forEach(e=>pessoalVal+=e.tipo==='rec'?e.total:e.total/(e.parcelas||1));
   document.getElementById('d-cartao-val').textContent=fmt(cartaoVal);
   document.getElementById('d-apto-val').textContent=fmt(aptoVal);
   document.getElementById('d-pessoal-val').textContent=fmt(pessoalVal);
@@ -966,14 +945,18 @@ function renderDuanni(){
   tbody.innerHTML=pessoal.map(e=>{
     const[iy,im]=e.mesInicio.split('-').map(Number);
     const[ty,tm]=month.split('-').map(Number);
-    const diff=(ty-iy)*12+(tm-im),parcNum=diff+1,parcTotal=e.parcelas||1;
+    const diff=(ty-iy)*12+(tm-im);
     const cat=CATS[e.categoria]||CATS.outros;
     const sb=e.status==='pago'?`<span class="badge badge-pago">✅ Pago</span>`:`<span class="badge badge-pendente">⏳ Pendente</span>`;
+    const isRec=e.tipo==='rec';
+    const parcTotal=isRec?1:(e.parcelas||1);
+    const parcNum=diff+1;
+    const valMes=isRec?e.total:e.total/parcTotal;
     return`<tr>
       <td><div class="store-name">${e.desc}</div>${e.obs?`<div class="desc-name">${e.obs}</div>`:''}</td>
       <td><span class="cat-tag ${cat.cls}">${cat.label}</span></td>
-      <td><div class="value-bold">${fmt(e.total/parcTotal)}</div>${parcTotal>1?`<div class="value-sub">${fmt(e.total)} total</div>`:''}</td>
-      <td>${FORMAS[e.forma]||e.forma}${parcTotal>1?`<span class="badge badge-parc" style="margin-left:3px">${parcNum}/${parcTotal}x</span>`:''}</td>
+      <td><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parcTotal>1)?`<div class="value-sub">${fmt(e.total)} total</div>`:''}</td>
+      <td>${FORMAS[e.forma]||e.forma}${isRec?`<span class="badge badge-rec" style="margin-left:3px">🔄 mensal</span>`:(parcTotal>1?`<span class="badge badge-parc" style="margin-left:3px">${parcNum}/${parcTotal}x</span>`:'')}</td>
       <td>${sb}</td>
       <td><div class="action-btns">
         <button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button>
@@ -1002,27 +985,100 @@ function renderApto(){
   const d=(DB.apto||{})[month]||{};
   const caixa=d.caixa?.valor||0;
   const aluguelBruto=d.aluguel?.valor||0;
-  const desc=d.aluguel?.desconto||0;
-  const aluguelLiq=aluguelBruto-desc;
+  const desc2=d.aluguel?.desconto||0;
+  const aluguelLiq=aluguelBruto-desc2;
+  const extras=d.extras||{};
+  const extrasTotal=Object.values(extras).reduce((s,v)=>s+(v.valor||0),0);
   document.getElementById('a-resultado').textContent=fmt((caixa-aluguelLiq)/2);
-  // caixa
-  document.getElementById('caixa-total-display').textContent=caixa?fmt(caixa):'—';
-  if(d.caixa){document.getElementById('ae-caixa-valor').value=caixa;document.getElementById('ae-caixa-obs').value=d.caixa.obs||'';}
-  const csb=document.getElementById('caixa-status-btn');
-  const cStatus=d.caixa?.status||'pendente';
-  csb.textContent=cStatus==='pago'?'✅ Pago':'⏳ Pendente';
-  csb.className='apto-status-badge '+(cStatus==='pago'?'status-pago':'status-pendente');
-  // aluguel
-  document.getElementById('aluguel-total-display').textContent=aluguelBruto?fmt(aluguelLiq):'—';
-  if(d.aluguel){document.getElementById('ae-aluguel-valor').value=aluguelBruto;document.getElementById('ae-aluguel-desconto').value=desc||'';}
-  const asb=document.getElementById('aluguel-status-btn');
-  const aStatus=d.aluguel?.status||'pendente';
-  asb.textContent=aStatus==='pago'?'✅ Pago':'⏳ Pendente';
-  asb.className='apto-status-badge '+(aStatus==='pago'?'status-pago':'status-pendente');
+
+  const grid=document.getElementById('apto-cards-grid');
+  let html='';
+
+  // CAIXA card
+  html+=`<div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;">
+    <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
+      <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🏦 Caixa</span>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <button class="apto-status-badge ${(d.caixa?.status||'pendente')==='pago'?'status-pago':'status-pendente'}" onclick="toggleAptoStatus('caixa')">${(d.caixa?.status||'pendente')==='pago'?'✅ Pago':'⏳ Pendente'}</button>
+        <button class="btn-edit-apto" onclick="toggleInlineEdit('caixa-inline')">✏️</button>
+      </div>
+    </div>
+    <div style="padding:11px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:0.76rem;color:var(--mocha);">parcela</span>
+      <span style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--dark);">${caixa?fmt(caixa):'—'}</span>
+    </div>
+    <div id="caixa-inline" style="display:none;padding:11px 16px;border-top:1px solid var(--blush);display:none;">
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <input id="ae-caixa-v" type="number" step="0.01" placeholder="valor (R$)" value="${caixa||''}"
+          style="font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:8px 11px;color:var(--dark);outline:none;">
+        <div style="display:flex;gap:6px;">
+          <button onclick="saveCaixaInline()" style="flex:1;background:#5a7a52;color:white;border:none;border-radius:9px;padding:8px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;font-weight:500;">💾 salvar</button>
+          <button onclick="toggleInlineEdit('caixa-inline')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:9px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // ALUGUEL card
+  html+=`<div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;">
+    <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
+      <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🏠 Aluguel</span>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <button class="apto-status-badge ${(d.aluguel?.status||'pendente')==='pago'?'status-pago':'status-pendente'}" onclick="toggleAptoStatus('aluguel')">${(d.aluguel?.status||'pendente')==='pago'?'✅ Pago':'⏳ Pendente'}</button>
+        <button class="btn-edit-apto" onclick="toggleInlineEdit('aluguel-inline')">✏️</button>
+        <button onclick="delAptoCard('aluguel')" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:0.84rem;padding:4px 6px;border-radius:7px;transition:background 0.15s;" onmouseover="this.style.background='#fce8e8'" onmouseout="this.style.background='none'">✕</button>
+      </div>
+    </div>
+    <div style="padding:11px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:0.76rem;color:var(--mocha);">líquido</span>
+      <span style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--dark);">${aluguelBruto?fmt(aluguelLiq):'—'}</span>
+    </div>
+    <div id="aluguel-inline" style="display:none;padding:11px 16px;border-top:1px solid var(--blush);">
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <input id="ae-aluguel-v" type="number" step="0.01" placeholder="valor bruto (R$)" value="${aluguelBruto||''}"
+          style="font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:8px 11px;color:var(--dark);outline:none;">
+        <input id="ae-aluguel-d" type="number" step="0.01" placeholder="desconto (R$)" value="${desc2||''}"
+          style="font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:8px 11px;color:var(--dark);outline:none;">
+        <div style="display:flex;gap:6px;">
+          <button onclick="saveAluguelInline()" style="flex:1;background:#7b5ea7;color:white;border:none;border-radius:9px;padding:8px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;font-weight:500;">💾 salvar</button>
+          <button onclick="toggleInlineEdit('aluguel-inline')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:9px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // EXTRA cards
+  Object.entries(extras).forEach(([key,item])=>{
+    const st=item.status||'pendente';
+    html+=`<div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;">
+      <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
+        <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">${item.label||key}</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <button class="apto-status-badge ${st==='pago'?'status-pago':'status-pendente'}" onclick="toggleAptoExtraStatus('${key}')">${st==='pago'?'✅ Pago':'⏳ Pendente'}</button>
+          <button class="btn-edit-apto" onclick="toggleInlineEdit('extra-inline-${key}')">✏️</button>
+          <button onclick="delAptoCard('${key}')" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:0.84rem;padding:4px 6px;border-radius:7px;transition:background 0.15s;" onmouseover="this.style.background='#fce8e8'" onmouseout="this.style.background='none'">✕</button>
+        </div>
+      </div>
+      <div style="padding:11px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:0.76rem;color:var(--mocha);">valor</span>
+        <span style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--dark);">${fmt(item.valor)}</span>
+      </div>
+      <div id="extra-inline-${key}" style="display:none;padding:11px 16px;border-top:1px solid var(--blush);">
+        <div style="display:flex;gap:6px;">
+          <input type="number" step="0.01" id="ae-extra-v-${key}" value="${item.valor||''}" placeholder="valor (R$)"
+            style="flex:1;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:9px;padding:8px 11px;color:var(--dark);outline:none;">
+          <button onclick="saveExtraCard('${key}')" style="background:#5a7a52;color:white;border:none;border-radius:9px;padding:8px 13px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;font-weight:500;">💾</button>
+          <button onclick="toggleInlineEdit('extra-inline-${key}')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:9px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:0.83rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML=html;
 }
-function toggleAptoEdit(tipo){
-  const panel=document.getElementById(tipo+'-edit');
-  panel.classList.toggle('open');
+function toggleInlineEdit(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
 }
 function toggleAptoStatus(tipo){
   const month=document.getElementById('a-month-sel').value;
@@ -1033,24 +1089,66 @@ function toggleAptoStatus(tipo){
   saveData();renderApto();renderDuanni();renderAlan();
   toast(DB.apto[month][tipo].status==='pago'?'✅ marcado como pago!':'↩ marcado como pendente');
 }
-function saveAptoItem(tipo){
+function toggleAptoExtraStatus(key){
+  const month=document.getElementById('a-month-sel').value;
+  if(!DB.apto[month].extras)DB.apto[month].extras={};
+  if(!DB.apto[month].extras[key])DB.apto[month].extras[key]={};
+  const cur=DB.apto[month].extras[key].status||'pendente';
+  DB.apto[month].extras[key].status=cur==='pago'?'pendente':'pago';
+  saveData();renderApto();renderDuanni();renderAlan();
+  toast(DB.apto[month].extras[key].status==='pago'?'✅ pago!':'↩ pendente');
+}
+function saveCaixaInline(){
+  const month=document.getElementById('a-month-sel').value;
+  const valor=parseFloat(document.getElementById('ae-caixa-v').value);
+  if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
+  if(!DB.apto)DB.apto={};if(!DB.apto[month])DB.apto[month]={};
+  const prev=DB.apto[month].caixa||{};
+  DB.apto[month].caixa={...prev,valor};
+  saveData();renderApto();renderDuanni();renderAlan();toast('✅ Caixa salvo!');
+}
+function saveAluguelInline(){
+  const month=document.getElementById('a-month-sel').value;
+  const valor=parseFloat(document.getElementById('ae-aluguel-v').value);
+  if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
+  const desconto=parseFloat(document.getElementById('ae-aluguel-d').value)||0;
+  if(!DB.apto)DB.apto={};if(!DB.apto[month])DB.apto[month]={};
+  const prev=DB.apto[month].aluguel||{};
+  DB.apto[month].aluguel={...prev,valor,desconto};
+  saveData();renderApto();renderDuanni();renderAlan();toast('✅ Aluguel salvo!');
+}
+function saveExtraCard(key){
+  const month=document.getElementById('a-month-sel').value;
+  const valor=parseFloat(document.getElementById('ae-extra-v-'+key).value);
+  if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
+  if(!DB.apto[month].extras)DB.apto[month].extras={};
+  DB.apto[month].extras[key]={...DB.apto[month].extras[key],valor};
+  saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo!');
+}
+function delAptoCard(tipo){
+  if(!confirm('Remover este item?'))return;
+  const month=document.getElementById('a-month-sel').value;
+  if(tipo==='aluguel'){delete DB.apto[month].aluguel;}
+  else if(DB.apto[month].extras){delete DB.apto[month].extras[tipo];}
+  saveData();renderApto();renderDuanni();renderAlan();toast('🗑️ removido!');
+}
+function openAddAptoCard(){
+  document.getElementById('new-card-label').value='';
+  document.getElementById('new-card-valor').value='';
+  document.getElementById('apto-add-overlay').style.display='flex';
+}
+function closeAddAptoCard(){document.getElementById('apto-add-overlay').style.display='none';}
+function confirmAddAptoCard(){
+  const label=document.getElementById('new-card-label').value.trim();
+  const valor=parseFloat(document.getElementById('new-card-valor').value);
+  if(!label){toast('⚠️ informe o nome!');return;}
+  if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
   const month=document.getElementById('a-month-sel').value;
   if(!DB.apto)DB.apto={};if(!DB.apto[month])DB.apto[month]={};
-  if(tipo==='caixa'){
-    const valor=parseFloat(document.getElementById('ae-caixa-valor').value);
-    if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
-    const prev=DB.apto[month].caixa||{};
-    DB.apto[month].caixa={...prev,valor,obs:document.getElementById('ae-caixa-obs').value.trim()};
-    toast('✅ Caixa salvo!');
-  }else{
-    const valor=parseFloat(document.getElementById('ae-aluguel-valor').value);
-    if(isNaN(valor)||valor<=0){toast('⚠️ informe o valor!');return;}
-    const prev=DB.apto[month].aluguel||{};
-    DB.apto[month].aluguel={...prev,valor,desconto:parseFloat(document.getElementById('ae-aluguel-desconto').value)||0,obs:document.getElementById('ae-aluguel-obs').value.trim()};
-    toast('✅ Aluguel salvo!');
-  }
-  document.getElementById(tipo+'-edit').classList.remove('open');
-  saveData();renderApto();renderDuanni();renderAlan();
+  if(!DB.apto[month].extras)DB.apto[month].extras={};
+  const key='extra_'+Date.now();
+  DB.apto[month].extras[key]={label,valor,status:'pendente'};
+  closeAddAptoCard();saveData();renderApto();renderDuanni();renderAlan();toast('✅ item adicionado!');
 }
 
 // ══ CARTÃO MODAL ══
@@ -1153,6 +1251,14 @@ function delCartao(id){
 }
 
 // ══ PESSOAL MODAL ══
+let pmExpType='parc';
+function setPMType(t){
+  pmExpType=t;
+  document.getElementById('pm-type-parc').classList.toggle('active',t==='parc');
+  document.getElementById('pm-type-rec').classList.toggle('active',t==='rec');
+  document.getElementById('pm-parc-fields').style.display=t==='parc'?'block':'none';
+  document.getElementById('pm-rec-fields').style.display=t==='rec'?'block':'none';
+}
 function openPessoalModal(id=null){
   pmEditId=id;
   document.getElementById('pm-title').textContent=id?'✏️ editar despesa':'🌸 nova despesa pessoal';
@@ -1163,11 +1269,18 @@ function openPessoalModal(id=null){
     document.getElementById('pm-total').value=e.total;
     document.getElementById('pm-forma').value=e.forma||'credito';
     document.getElementById('pm-status').value=e.status||'pendente';
-    document.getElementById('pm-parcelas').value=e.parcelas||1;
-    document.getElementById('pm-mes-compra').value=e.mesInicio||TODAY;
     document.getElementById('pm-obs').value=e.obs||'';
+    if(e.tipo==='rec'){
+      setPMType('rec');
+      document.getElementById('pm-rec-inicio').value=e.mesInicio||TODAY;
+    } else {
+      setPMType('parc');
+      document.getElementById('pm-parcelas').value=e.parcelas||1;
+      document.getElementById('pm-mes-compra').value=e.mesInicio||TODAY;
+    }
   }else{
     ['pm-desc','pm-total','pm-obs'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+    setPMType('parc');
     document.getElementById('pm-parcelas').value=1;
     document.getElementById('pm-mes-compra').value=document.getElementById('d-month-sel').value;
     document.getElementById('pm-cat').value='outros';
@@ -1181,7 +1294,17 @@ function savePessoalExpense(){
   const desc=document.getElementById('pm-desc').value.trim();
   const total=parseFloat(document.getElementById('pm-total').value);
   if(!desc||isNaN(total)){toast('⚠️ preencha descrição e valor!');return;}
-  const obj={desc,total,categoria:document.getElementById('pm-cat').value,forma:document.getElementById('pm-forma').value,status:document.getElementById('pm-status').value,parcelas:parseInt(document.getElementById('pm-parcelas').value)||1,mesInicio:document.getElementById('pm-mes-compra').value,obs:document.getElementById('pm-obs').value.trim()};
+  let mesInicioPM, parcelasPM, tiposPM;
+  if(pmExpType==='rec'){
+    mesInicioPM=document.getElementById('pm-rec-inicio').value;
+    parcelasPM=99999;
+    tiposPM='rec';
+  } else {
+    mesInicioPM=document.getElementById('pm-mes-compra').value;
+    parcelasPM=parseInt(document.getElementById('pm-parcelas').value)||1;
+    tiposPM='parc';
+  }
+  const obj={desc,total,tipo:tiposPM,categoria:document.getElementById('pm-cat').value,forma:document.getElementById('pm-forma').value,status:document.getElementById('pm-status').value,parcelas:parcelasPM,mesInicio:mesInicioPM,obs:document.getElementById('pm-obs').value.trim()};
   if(!DB.pessoal)DB.pessoal=[];
   if(pmEditId){const idx=DB.pessoal.findIndex(x=>x.id===pmEditId);if(idx>-1)DB.pessoal[idx]={...DB.pessoal[idx],...obj};toast('✅ atualizada!');}
   else{DB.pessoal.push({id:Date.now().toString(),...obj});toast('✅ adicionada!');}
