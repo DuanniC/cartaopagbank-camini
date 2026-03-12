@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ Financeiro</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=DM+Sans:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=DM+Sans:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   --cream:#faf7f2;--blush:#f2e8e0;--rose:#d4a5a5;
@@ -744,7 +747,14 @@ function showPage(p){
 
 // ══ SUPABASE ══
 async function loadData(){
-  syncBar('syncing','☁️ carregando...');
+  // Carrega cache local imediatamente para evitar tela vazia
+  const bkFast=localStorage.getItem('cc_bk');
+  if(bkFast)try{
+    const p=JSON.parse(bkFast);
+    DB={...DB,...p};
+    rebuildAllSelects();renderAll(); // render rápido com dados locais
+  }catch(e2){}
+  syncBar('syncing','☁️ atualizando...');
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=data`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
     if(!r.ok)throw new Error('HTTP '+r.status);
@@ -764,9 +774,8 @@ async function loadData(){
     localStorage.setItem('cc_bk',JSON.stringify(DB));
     syncBar('ok','✅ sincronizado!');
   }catch(e){
-    const bk=localStorage.getItem('cc_bk');
-    if(bk)try{const p=JSON.parse(bk);DB={...DB,...p};}catch(e2){}
     syncBar('error','⚠️ offline — dados locais. Toque para tentar.');
+    return; // já carregou do cache acima
   }
   rebuildAllSelects();preencherAptoFuturo();renderAll();
 }
@@ -1735,7 +1744,16 @@ function togglePessoalStatus(id,month){
 }
 
 // ══ RENDER ALL ══
-function renderAll(){renderCartao();renderDuanni();renderAlan();renderRonaldo();renderApto();}
+function renderAll(){
+  const pid=(document.querySelector('.page.active')||{}).id||'page-cartao';
+  const p=pid.replace('page-','');
+  if(p==='cartao')renderCartao();
+  else if(p==='duanni')renderDuanni();
+  else if(p==='alan')renderAlan();
+  else if(p==='ronaldo')renderRonaldo();
+  else if(p==='apto')renderApto();
+  else renderCartao();
+}
 
 // ══ START ══
 rebuildAllSelects();
