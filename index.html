@@ -306,7 +306,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
   .apto-grid-mobile{grid-template-columns:1fr!important;}
 
   /* ── modal ── */
-  .modal{padding:18px 14px;margin:10px;width:auto;border-radius:18px;}
+  .modal{padding:22px 20px;margin:8px;width:auto;border-radius:18px;}
   .form-grid{grid-template-columns:1fr;}
   h3{font-size:1rem;}
 
@@ -542,7 +542,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <h3>🔒 área pessoal</h3><p>senha para continuar</p>
-    <input class="pw-input" id="pw-input" type="password" placeholder="••••" onkeydown="if(event.key==='Enter')checkPassword()">
+    <input class="pw-input" id="pw-input" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="••••" onkeydown="if(event.key==='Enter')checkPassword()">
     <div class="pw-error" id="pw-error"></div>
     <div class="pw-actions">
       <button class="pw-btn pw-cancel" onclick="closePwModal()">cancelar</button>
