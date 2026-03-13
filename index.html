@@ -145,15 +145,16 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .btn-lav{background:var(--lav-dark);}.btn-lav:hover{background:#6a4d96;}
 table{width:100%;border-collapse:collapse;}
 thead tr{background:var(--cream);}
-thead th{padding:9px 12px;text-align:left;font-size:0.66rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);font-weight:500;border-bottom:1px solid var(--blush);}
+thead th{padding:9px 22px;text-align:left;font-size:0.66rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);font-weight:500;border-bottom:1px solid var(--blush);}
 tbody tr{border-bottom:1px solid var(--blush);transition:background 0.15s;animation:fadeIn 0.3s ease;}
 tbody tr:last-child{border-bottom:none;}
 tbody tr:hover{background:var(--cream);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
+td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 .store-name{font-weight:500;}
-.desc-name{font-size:0.74rem;color:var(--mocha);margin-top:2px;font-style:italic;}
+.col-nome{min-width:180px;}
+.desc-name{font-size:0.74rem;color:var(--mocha);margin-top:4px;font-style:italic;}
 .badge{border-radius:10px;padding:3px 8px;font-size:0.72rem;font-weight:500;white-space:nowrap;display:inline-block;}
 .badge-parc{background:#ede5f7;color:#5a3285;}
 .badge-rec{background:#e8f0e8;color:#4a6044;}
@@ -270,12 +271,10 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
   }
   .tbl-cartao tbody tr td,.tbl-pessoal tbody tr td,.tbl-ronaldo tbody tr td{
     display:inline-flex;align-items:center;padding:0!important;border:none!important;
-    line-height:1.3;
+    line-height:1.3;vertical-align:middle;
   }
-  /* col nome: full width */
-  .tbl-cartao tbody tr td:nth-child(1),
-  .tbl-pessoal tbody tr td:nth-child(1),
-  .tbl-ronaldo tbody tr td:nth-child(1){width:100%;padding:0!important;margin-bottom:2px;}
+  /* col nome: full width no mobile */
+  .col-nome{display:block!important;width:100%!important;padding:0!important;margin-bottom:4px;}
   /* cartão: esconder total geral e divisão, mostrar parcelas + este mês + pagadores */
   .tbl-cartao td:nth-child(3),.tbl-cartao td:nth-child(6){display:none!important;}
   /* pessoal: esconder pagamento, manter cat+valor+banco+status */
@@ -621,9 +620,11 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
     <div id="cm-parc-fields">
       <div class="form-grid">
         <div class="form-row"><label>💰 valor total (R$)</label><input id="cm-total" type="number" step="0.01" placeholder="0,00" oninput="cmTotalChange()"></div>
-        <div class="form-row"><label>🔢 nº parcelas</label><input id="cm-parcelas" type="number" min="1" placeholder="ex: 12" oninput="cmTotalChange()"></div>
+        <div class="form-row"><label>🔢 nº parcelas</label><input id="cm-parcelas" type="number" min="1" placeholder="ex: 12" oninput="cmTotalChange();updateCMParcInfo()"></div>
       </div>
-      <div class="form-row"><label>🗓️ mês da compra</label><select id="cm-mes-compra"></select></div>
+      <div class="form-row"><label>🗓️ mês da compra</label><select id="cm-mes-compra" onchange="updateCMParcInfo()"></select>
+        <div id="cm-parc-info" style="display:none;font-size:0.73rem;color:#4a6044;margin-top:6px;padding:5px 10px;background:var(--sage-light);border-radius:8px;font-weight:500;"></div>
+      </div>
     </div>
     <div id="cm-rec-fields" style="display:none">
       <div class="form-grid">
@@ -687,9 +688,10 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
     </div>
     <div id="pm-parc-fields">
       <div class="form-grid">
-        <div class="form-row"><label>🔢 parcelas</label><input id="pm-parcelas" type="number" min="1" placeholder="1 = à vista"></div>
-        <div class="form-row"><label>🗓️ mês da compra</label><select id="pm-mes-compra"></select></div>
+        <div class="form-row"><label>🔢 parcelas</label><input id="pm-parcelas" type="number" min="1" placeholder="1 = à vista" oninput="updatePMParcInfo()"></div>
+        <div class="form-row"><label>🗓️ mês da compra</label><select id="pm-mes-compra" onchange="updatePMParcInfo()"></select></div>
       </div>
+      <div id="pm-parc-info" style="display:none;font-size:0.73rem;color:#4a6044;margin-top:6px;padding:5px 10px;background:var(--sage-light);border-radius:8px;font-weight:500;grid-column:1/-1;"></div>
     </div>
     <div id="pm-rec-fields" style="display:none">
       <div class="form-row"><label>📆 a partir de</label><select id="pm-rec-inicio"></select></div>
@@ -1141,15 +1143,13 @@ function renderCartao(){
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
     let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>`${PC[pp].emoji} ${fmt(e.customSplit[pp]||0)}`).join('<br>');
     return`<tr>
-      <td style="width:100%;padding:0!important;display:block!important;margin-bottom:3px;">
-        <span class="store-name">${e.store}</span><span class="desc-name" style="margin-left:5px;">${e.desc}</span>
-      </td>
-      <td style="padding:0!important;">${badge}</td>
-      <td style="padding:0!important;"><div class="value-bold">${fmt(e.total)}</div></td>
-      <td style="padding:0!important;"><div class="value-sub">${fmt(p.value)}</div></td>
-      <td style="padding:0!important;">${tags}</td>
-      <td style="padding:0!important;font-size:0.8rem;">${sd}</td>
-      <td style="padding:0!important;margin-left:auto;"><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td>
+      <td class="col-nome"><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td>
+      <td>${badge}</td>
+      <td><div class="value-bold">${fmt(e.total)}</div></td>
+      <td><div class="value-sub">${fmt(p.value)}</div></td>
+      <td>${tags}</td>
+      <td style="font-size:0.8rem;">${sd}</td>
+      <td><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
 }
@@ -1553,7 +1553,7 @@ function openDescModal(){
 }
 function closeDescModal(){document.getElementById('ov-desc').classList.remove('active');}
 function renderDescLista(){
-  const IS='font-family:\'DM Sans\',sans-serif;font-size:0.87rem;background:var(--white);border:1.5px solid var(--blush);border-radius:8px;padding:6px 10px;color:var(--dark);outline:none;width:100%;';
+  const IS='font-family:\'DM Sans\',sans-serif;font-size:0.87rem;background:var(--white);border:1.5px solid var(--blush);border-radius:8px;padding:6px 10px;color:var(--dark);outline:none;width:100%;box-sizing:border-box;max-width:100%;';
   const lista=document.getElementById('desc-lista');
   if(!lista)return;
   lista.innerHTML=_descItems.length===0
@@ -1570,7 +1570,7 @@ function renderDescLista(){
       else if(diff>=d.parcelas)parcInfo=`✅ encerrada ${getML(fim)}`;
       else parcInfo=`✅ ${diff+1}/${d.parcelas} · termina ${getML(fim)}`;
     }
-    return`<div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid var(--blush);">
+    return`<div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid var(--blush);overflow:hidden;">
       <div style="display:flex;gap:6px;margin-bottom:8px;">
         <input type="text" value="${d.nome||''}" placeholder="nome do desconto" oninput="_descItems[${i}].nome=this.value"
           style="${IS}">
@@ -1594,7 +1594,7 @@ function renderDescLista(){
           <option value="add"${d.modo==='add'?' selected':''}>➕ soma ao aluguel</option>
         </select>
       </div>
-      ${tipo==='parcelado'?`<div style="display:flex;flex-direction:column;gap:8px;">
+      ${tipo==='parcelado'?`<div style="display:flex;flex-direction:column;gap:8px;overflow:hidden;">
         <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">mês início</div>
           <input type="month" value="${d.inicio||TODAY}" oninput="_descItems[${i}].inicio=this.value;renderDescLista()" style="${IS}">
         </div>
@@ -1700,7 +1700,7 @@ function openCartaoModal(id=null){
     setCType(e.tipo||'parc');
     document.getElementById('cm-store').value=e.store;document.getElementById('cm-desc').value=e.desc;
     if(e.tipo==='rec'){document.getElementById('cm-mensal').value=e.total;document.getElementById('cm-rec-inicio').value=e.mesInicio;document.getElementById('cm-rec-fim').value=e.mesFim||'';}
-    else{document.getElementById('cm-total').value=e.total;document.getElementById('cm-parcelas').value=e.parcelas;document.getElementById('cm-mes-compra').value=e.mesInicio;}
+    else{document.getElementById('cm-total').value=e.total;document.getElementById('cm-parcelas').value=e.parcelas;document.getElementById('cm-mes-compra').value=e.mesInicio;setTimeout(updateCMParcInfo,50);}
     (e.payers||[]).forEach(p=>{const cb=document.querySelector(`#ov-cartao .payer-option input[value="${p}"]`);if(cb)cb.checked=true;});
     setCMSplit(e.splitMode||'equal');if(e.splitMode==='custom'&&e.customSplit)setTimeout(()=>buildCMCustom(e.customSplit),60);
   }else{
@@ -1728,7 +1728,36 @@ function setCMSplit(mode){
   if(mode==='custom')buildCMCustom();
 }
 function getCMParcVal(){if(cmExpType==='rec')return parseFloat(document.getElementById('cm-mensal').value)||0;const t=parseFloat(document.getElementById('cm-total').value)||0,p=parseInt(document.getElementById('cm-parcelas').value)||1;return t/p;}
-function cmTotalChange(){if(cmSplitMode==='custom')buildCMCustom();}
+function calcParcInfo(mesInicio, parcelas, today){
+  // Retorna string resumida: "X/Y · termina Mês Ano" ou "" se inválido
+  if(!mesInicio||!parcelas||parcelas<=1)return '';
+  const[iy,im]=mesInicio.split('-').map(Number);
+  const[ty,tm]=today.split('-').map(Number);
+  const diff=(ty-iy)*12+(tm-im);
+  const fim=shiftM(mesInicio,parcelas-1);
+  if(diff<0)return`⏳ começa ${getML(mesInicio)} · ${parcelas}x`;
+  if(diff>=parcelas)return`✅ encerrada · termina ${getML(fim)}`;
+  return`✅ ${diff+1}/${parcelas} · termina ${getML(fim)}`;
+}
+function updateCMParcInfo(){
+  const mes=document.getElementById('cm-mes-compra')?.value;
+  const parc=parseInt(document.getElementById('cm-parcelas')?.value)||0;
+  const el=document.getElementById('cm-parc-info');
+  if(!el)return;
+  const info=calcParcInfo(mes,parc,TODAY);
+  el.textContent=info;
+  el.style.display=info?'block':'none';
+}
+function updatePMParcInfo(){
+  const mes=document.getElementById('pm-mes-compra')?.value;
+  const parc=parseInt(document.getElementById('pm-parcelas')?.value)||0;
+  const el=document.getElementById('pm-parc-info');
+  if(!el)return;
+  const info=calcParcInfo(mes,parc,TODAY);
+  el.textContent=info;
+  el.style.display=info?'block':'none';
+}
+function cmTotalChange(){if(cmSplitMode==='custom')buildCMCustom();updateCMParcInfo();}
 function buildCMCustom(saved){
   const checked=[...document.querySelectorAll('#ov-cartao .payer-option input:checked')].map(i=>i.value);
   const pv=getCMParcVal(),eq=checked.length?pv/checked.length:0;
