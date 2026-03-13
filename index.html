@@ -947,58 +947,56 @@ function getRonaldoMonths(){
 }
 // Smart month range for Apartamento
 function getAptoMonths(){
-  const set=new Set();
+  // Fixo: 1 mês anterior + mês atual + 3 à frente
   const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
-  // 1 month back + today + 3 ahead (base)
-  set.add(addMos(cy,cm,-1));
-  set.add(TODAY);
-  for(let i=1;i<=3;i++) set.add(addMos(cy,cm,i));
-  // Add months with active apto data (caixa/aluguel/extras already saved)
-  Object.keys(DB.apto||{}).forEach(m=>{
-    const d=DB.apto[m];
-    if(d&&(d.caixa||d.aluguel||Object.keys(d.extras||{}).length)){
-      set.add(m);
-      // keep up to 3 months ahead of any saved data too
-      for(let i=1;i<=3;i++) set.add(shiftM(m,i));
-    }
-  });
-  // Descontos parcelados: include final month in apto range
-  getDescAutomaticos().filter(d=>d.tipo==='parcelado'&&d.inicio&&d.parcelas).forEach(d=>{
-    const lastM=shiftM(d.inicio,d.parcelas-1);set.add(lastM);
-  });
-  return [...set].sort();
+  const months=[];
+  months.push(addMos(cy,cm,-1));
+  months.push(TODAY);
+  for(let i=1;i<=3;i++) months.push(addMos(cy,cm,i));
+  return months;
 }
-// Pré-preenche em cascata todos os meses futuros do apto que ainda estão vazios
-function preencherAptoFuturo(){
+// Pré-preenche em cascata todos os meses futuros do apto
+// forcePropagate=true → sobrescreve mesmo meses já preenchidos (preserva status 'pago')
+function preencherAptoFuturo(forcePropagate){
   if(!DB.apto)DB.apto={};
-  const meses=getAptoMonths(); // range completo ordenado
+  const meses=getAptoMonths();
   let salvou=false;
   for(let i=1;i<meses.length;i++){
     const month=meses[i];
     const prevM=meses[i-1];
     const d=DB.apto[month]||{};
     const prevD=DB.apto[prevM]||{};
+    // Só propaga para meses futuros (a partir do mês atual)
+    const isFuture=month>=TODAY;
+    if(!isFuture)continue;
     let changed=false;
-    // Caixa: se vazio e mês anterior tem valor, aplica taxa
-    if(!d.caixa&&prevD.caixa&&prevD.caixa.valor){
-      if(!DB.apto[month])DB.apto[month]={};
+    // Caixa: aplica taxa sobre o mês anterior
+    if(prevD.caixa&&prevD.caixa.valor){
       const novoVal=Math.round(prevD.caixa.valor*(1+CAIXA_TAXA)*100)/100;
-      DB.apto[month].caixa={valor:novoVal,status:'pendente'};
-      changed=true;
+      const jaTemStatus=d.caixa?.status;
+      if(!d.caixa||(forcePropagate&&jaTemStatus!=='pago')){
+        if(!DB.apto[month])DB.apto[month]={};
+        DB.apto[month].caixa={valor:novoVal,status:jaTemStatus||'pendente'};
+        changed=true;
+      }
     }
-    // Aluguel: se vazio e mês anterior tem valor, copia igual (status sempre pendente)
-    if(!d.aluguel&&prevD.aluguel&&prevD.aluguel.valor){
-      if(!DB.apto[month])DB.apto[month]={};
-      DB.apto[month].aluguel={...prevD.aluguel,status:'pendente'};
-      changed=true;
+    // Aluguel: copia modo + desconto do mês anterior, preserva status se já pago
+    if(prevD.aluguel&&prevD.aluguel.valor){
+      const jaTemStatus=d.aluguel?.status;
+      if(!d.aluguel||(forcePropagate&&jaTemStatus!=='pago')){
+        if(!DB.apto[month])DB.apto[month]={};
+        DB.apto[month].aluguel={...prevD.aluguel,status:jaTemStatus||'pendente'};
+        changed=true;
+      }
     }
-    // Extras: copia itens fixos (sem status pago)
+    // Extras: copia cada item com modo atualizado
     if(prevD.extras&&Object.keys(prevD.extras).length){
       if(!DB.apto[month])DB.apto[month]={};
       if(!DB.apto[month].extras)DB.apto[month].extras={};
       Object.entries(prevD.extras).forEach(([k,v])=>{
-        if(!DB.apto[month].extras[k]&&v.valor){
-          DB.apto[month].extras[k]={...v,status:'pendente'};
+        const jaTemStatus=d.extras?.[k]?.status;
+        if(!d.extras?.[k]||(forcePropagate&&jaTemStatus!=='pago')){
+          DB.apto[month].extras[k]={...v,status:jaTemStatus||'pendente'};
           changed=true;
         }
       });
@@ -1491,7 +1489,7 @@ function saveAluguelInline(){
   const modo=document.getElementById('ae-aluguel-modo')?.value||'sub';
   if(!DB.apto[month])DB.apto[month]={};
   DB.apto[month].aluguel={...(DB.apto[month].aluguel||{}),valor,desconto,modo};
-  saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo!');
+  preencherAptoFuturo(true);saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
 }
 function saveExtraCard(key){
   const month=document.getElementById('a-month-sel').value;
@@ -1500,7 +1498,7 @@ function saveExtraCard(key){
   const modo=document.getElementById('ae-extra-modo-'+key)?.value||'add';
   if(!DB.apto[month].extras)DB.apto[month].extras={};
   DB.apto[month].extras[key]={...DB.apto[month].extras[key],valor,modo};
-  saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo!');
+  preencherAptoFuturo(true);saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
 }
 function delAptoCard(tipo){
   if(!confirm('Remover este item?'))return;
@@ -1633,7 +1631,7 @@ function saveDescModal(){
   const incompletos=_descItems.filter(d=>!d.nome||!(d.valor>0));
   if(incompletos.length>0){toast('⚠️ preencha nome e valor de todos os descontos!');return;}
   DB.descontos=_descItems.map(d=>({...d}));
-  closeDescModal();saveData();renderApto();renderDuanni();renderAlan();toast('✅ descontos salvos!');
+  preencherAptoFuturo(true);closeDescModal();saveData();renderApto();renderDuanni();renderAlan();toast('✅ descontos salvos! Meses futuros atualizados.');
 }
 
 // ══ CLARO ══
