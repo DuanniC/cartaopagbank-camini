@@ -198,7 +198,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 .btn-edit-apto:hover{background:var(--rose);color:var(--white);}
 
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(61,43,31,0.4);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(61,43,31,0.4);backdrop-filter:blur(4px);z-index:500;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 0;}
 .overlay.active{display:flex;}
 .modal{background:var(--white);border-radius:24px;padding:28px 32px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(61,43,31,0.2);animation:slideUp 0.3s cubic-bezier(.16,1,.3,1);max-height:92vh;overflow-y:auto;}
 .modal h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--mocha);margin-bottom:18px;}
@@ -474,13 +474,16 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     </div>
     <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;">
       <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
-        <span style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🌐 Internet Claro</span>
+        <span id="ro-claro-nome" style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🌐 Internet Claro</span>
         <div style="display:flex;align-items:center;gap:8px;">
           <span id="ro-claro-val" style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--dark);">—</span>
           <button onclick="toggleInlineEdit('claro-edit-panel')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:8px;padding:4px 10px;font-size:0.76rem;cursor:pointer;">✏️</button>
         </div>
       </div>
       <div id="claro-edit-panel" style="display:none;padding:12px 16px;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <input id="claro-nome-input" type="text" class="inline-input" style="margin:0;flex:1;" placeholder="nome (ex: Internet Claro)">
+        </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <input id="claro-input" type="number" step="0.01" class="inline-input" style="margin:0;" placeholder="ex: 135,66">
           <button onclick="saveClaro()" style="background:#7a5535;color:white;border:none;border-radius:10px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;white-space:nowrap;">💾</button>
@@ -558,10 +561,10 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 
 <!-- MODAL DESCONTOS ALUGUEL -->
 <div class="overlay" id="ov-desc" onclick="if(event.target===this)closeDescModal()">
-  <div class="modal" style="max-width:440px;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;">
+  <div class="modal" style="max-width:440px;">
     <h3>⚙️ descontos automáticos</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Deduzidos automaticamente do valor bruto todo mês</p>
-    <div id="desc-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;flex:1;overflow-y:auto;"></div>
+    <div id="desc-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
     <button onclick="addDescItem()" style="width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;margin-bottom:16px;">+ adicionar desconto</button>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeDescModal()">cancelar</button>
@@ -838,6 +841,7 @@ async function loadData(){
       DB.pessoal=Array.isArray(d.pessoal)?d.pessoal:[];
       DB.apto=d.apto||{};
       DB.claro=d.claro||0;
+      DB.claroLabel=d.claroLabel||null;
       DB.divisao=d.divisao||{duanni:50,alan:50};
       DB.devoIds=Array.isArray(d.devoIds)?d.devoIds:(d.devo?[]:[]);
       DB.desc_garagem=d.desc_garagem||null;
@@ -1264,7 +1268,10 @@ function renderRonaldo(){
   document.getElementById('ro-btn-today').classList.toggle('visible',month!==TODAY);
   document.getElementById('ro-month-lbl').textContent=getML(month);
   const claroVal=DB.claro||0;
+  const claroLabel=DB.claroLabel||'Internet Claro';
   document.getElementById('ro-claro-val').innerHTML=fmt(claroVal);
+  document.getElementById('ro-claro-nome').textContent='🌐 '+claroLabel;
+  document.getElementById('claro-nome-input').value=claroLabel;
   if(DB.claro)document.getElementById('claro-input').value=DB.claro;
   const active=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.payers||[]).includes('ronaldo'));
   const foot=document.getElementById('ro-cartao-foot');
@@ -1689,7 +1696,9 @@ function saveDevoModal(){
 function saveClaro(){
   const v=parseFloat(document.getElementById('claro-input').value);
   if(isNaN(v)||v<0){toast('⚠️ informe o valor!');return;}
-  DB.claro=v;saveData();toggleInlineEdit('claro-edit-panel');renderRonaldo();toast('✅ Claro atualizada!');
+  const nome=document.getElementById('claro-nome-input').value.trim();
+  if(nome)DB.claroLabel=nome;
+  DB.claro=v;saveData();toggleInlineEdit('claro-edit-panel');renderRonaldo();toast('✅ salvo!');
 }
 
 // ══ CARTÃO MODAL ══
