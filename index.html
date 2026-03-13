@@ -86,11 +86,11 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 
 /* BANNER */
 .banner{border-radius:18px;padding:18px 26px;color:var(--white);margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-.banner.mocha{background:linear-gradient(135deg,var(--mocha),var(--dusty));box-shadow:0 5px 20px rgba(139,99,85,0.26);}
-.banner.lav{background:linear-gradient(135deg,var(--lav-dark),#a78bca);box-shadow:0 5px 20px rgba(123,94,167,0.22);}
-.banner.alan{background:linear-gradient(135deg,#3a6b42,#6a9b72);box-shadow:0 5px 20px rgba(58,107,66,0.2);}
-.banner.sage{background:linear-gradient(135deg,#5a7a52,#8aaa82);box-shadow:0 5px 20px rgba(90,122,82,0.2);}
-.banner.ron{background:linear-gradient(135deg,#7a5535,#b8896e);box-shadow:0 5px 20px rgba(122,85,53,0.22);}
+.banner.mocha{background:linear-gradient(135deg,#3b1f6e,#6b35a8,#8b4cc4);box-shadow:0 5px 24px rgba(80,30,140,0.38);}
+.banner.lav{background:linear-gradient(135deg,#b57aaa,#d4a0c8,#e8b8d8);box-shadow:0 5px 20px rgba(180,100,170,0.26);}
+.banner.alan{background:linear-gradient(135deg,#1a5c45,#2e8b6a,#3daa84);box-shadow:0 5px 20px rgba(26,92,69,0.28);}
+.banner.sage{background:linear-gradient(135deg,#1e5fa8,#3d8fd4);box-shadow:0 5px 20px rgba(30,95,168,0.28);}
+.banner.ron{background:linear-gradient(135deg,#7a4a10,#c47c2a,#d9973c);box-shadow:0 5px 20px rgba(150,90,20,0.30);}
 .banner .b-label{font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;opacity:0.82;margin-bottom:2px;}
 .banner .b-total{font-size:1.8rem;font-weight:600;}
 .banner .b-month{font-family:'Playfair Display',serif;font-size:0.9rem;font-style:italic;opacity:0.85;}
@@ -155,7 +155,7 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
 .store-name{font-weight:500;}
 .desc-name{font-size:0.74rem;color:var(--mocha);margin-top:2px;font-style:italic;}
 .badge{border-radius:10px;padding:3px 8px;font-size:0.72rem;font-weight:500;white-space:nowrap;display:inline-block;}
-.badge-parc{background:var(--blush);color:var(--mocha);}
+.badge-parc{background:#ede5f7;color:#5a3285;}
 .badge-rec{background:#e8f0e8;color:#4a6044;}
 .badge-pago{background:#e8f0e8;color:#4a6044;}
 .badge-pendente{background:#fce8e8;color:#9b5c5c;}
@@ -263,17 +263,19 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
 
   /* ── tabelas: layout card no mobile ── */
   .tbl-cartao thead,.tbl-pessoal thead,.tbl-ronaldo thead{display:none;}
+  .tbl-cartao tbody,.tbl-pessoal tbody,.tbl-ronaldo tbody{display:block;width:100%;}
   .tbl-cartao tbody tr,.tbl-pessoal tbody tr,.tbl-ronaldo tbody tr{
-    display:flex;flex-wrap:wrap;align-items:center;
-    padding:11px 12px;border-bottom:1px solid var(--blush);gap:6px;
+    display:flex;flex-wrap:wrap;align-items:center;width:100%;box-sizing:border-box;
+    padding:10px 14px 9px;border-bottom:1px solid var(--blush);gap:2px 8px;
   }
   .tbl-cartao tbody tr td,.tbl-pessoal tbody tr td,.tbl-ronaldo tbody tr td{
-    display:inline-flex;align-items:center;padding:0;border:none;
+    display:inline-flex;align-items:center;padding:0!important;border:none!important;
+    line-height:1.3;
   }
   /* col nome: full width */
-  .tbl-cartao td:nth-child(1){width:100%;margin-bottom:2px;}
-  .tbl-pessoal td:nth-child(1){width:100%;margin-bottom:2px;}
-  .tbl-ronaldo td:nth-child(1){width:100%;margin-bottom:2px;}
+  .tbl-cartao tbody tr td:nth-child(1),
+  .tbl-pessoal tbody tr td:nth-child(1),
+  .tbl-ronaldo tbody tr td:nth-child(1){width:100%;padding:0!important;margin-bottom:2px;}
   /* cartão: esconder total geral e divisão, mostrar parcelas + este mês + pagadores */
   .tbl-cartao td:nth-child(3),.tbl-cartao td:nth-child(6){display:none!important;}
   /* pessoal: esconder pagamento, manter cat+valor+banco+status */
@@ -307,7 +309,7 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
   .person-tag{font-size:0.65rem;padding:2px 6px;}
   .badge{font-size:0.72rem;padding:3px 8px;}
   /* tabelas com scroll horizontal se necessário */
-  .table-section{border-radius:14px;}
+  .table-section{border-radius:14px;overflow:hidden;}
   .table-section table{min-width:0;width:100%;}
   /* compactar banner do apto */
   .banner{flex-direction:column;align-items:flex-start;gap:10px;}
@@ -567,7 +569,7 @@ td{padding:11px 12px;font-size:0.85rem;vertical-align:middle;}
 <!-- MODAL DESCONTOS ALUGUEL -->
 <div class="overlay" id="ov-desc" onclick="if(event.target===this)closeDescModal()">
   <div class="modal" style="max-width:440px;">
-    <h3>⚙️ descontos automáticos do aluguel</h3>
+    <h3>⚙️ descontos automáticos</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Deduzidos automaticamente do valor bruto todo mês</p>
     <div id="desc-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
     <button onclick="addDescItem()" style="width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;margin-bottom:16px;">+ adicionar desconto</button>
@@ -1068,17 +1070,20 @@ function calcDescValorMes(dc,month){
   }
   return 0;
 }
-// Total dos descontos automáticos num mês
+// Total dos descontos automáticos num mês (respeitando modo de cada item)
 function getTotalDescontos(month){
-  return getDescAutomaticos().reduce((s,dc)=>s+calcDescValorMes(dc,month),0);
+  return getDescAutomaticos().reduce((s,dc)=>{
+    const val=calcDescValorMes(dc,month);
+    return (dc.modo||'sub')==='sub'?s-val:s+val;
+  },0);
 }
 function getAptoCalc(month){
   const d=(DB.apto||{})[month]||{};
   const caixa=d.caixa?.valor||0;
   const aluguelBruto=d.aluguel?.valor||0;
   const descManual=d.aluguel?.desconto||0;
-  const descAuto=getTotalDescontos(month);
-  const aluguelLiq=aluguelBruto-descManual-descAuto;
+  const descAuto=getTotalDescontos(month); // valor com sinal (negativo=subtrai, positivo=soma)
+  const aluguelLiq=aluguelBruto-descManual+descAuto; // descAuto já traz o sinal correto
   // aluguel: modo subtrai por padrão, mas pode ser soma (condomínio futuro etc.)
   const aluguelModo=d.aluguel?.modo||'sub';
   // extras: cada um tem seu modo (sub=desconta, add=soma)
@@ -1144,11 +1149,17 @@ function renderCartao(){
     const tags=(e.payers||[]).map(pp=>`<span class="person-tag ${PC[pp].tag}">${PC[pp].emoji} ${PC[pp].label}</span>`).join('');
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
     let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>`${PC[pp].emoji} ${fmt(e.customSplit[pp]||0)}`).join('<br>');
-    return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td>
-      <td>${badge}</td><td><div class="value-bold">${fmt(e.total)}</div></td>
-      <td><div class="value-sub">${fmt(p.value)}</div></td>
-      <td>${tags}</td><td style="font-size:0.8rem;">${sd}</td>
-      <td><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td></tr>`;
+    return`<tr>
+      <td style="width:100%;padding:0!important;display:block!important;margin-bottom:3px;">
+        <span class="store-name">${e.store}</span><span class="desc-name" style="margin-left:5px;">${e.desc}</span>
+      </td>
+      <td style="padding:0!important;">${badge}</td>
+      <td style="padding:0!important;"><div class="value-bold">${fmt(e.total)}</div></td>
+      <td style="padding:0!important;"><div class="value-sub">${fmt(p.value)}</div></td>
+      <td style="padding:0!important;">${tags}</td>
+      <td style="padding:0!important;font-size:0.8rem;">${sd}</td>
+      <td style="padding:0!important;margin-left:auto;"><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td>
+    </tr>`;
   }).join('');
 }
 function setFilter(p){
@@ -1196,13 +1207,13 @@ function renderDuanni(){
     const stLbl=stMes==='pago'?'✅ Pago':'⏳ Pendente';
     const banco=e.banco&&BANCOS[e.banco]?`<span class="banco-tag">${BANCOS[e.banco]}</span>`:'<span style="color:var(--rose);font-size:0.76rem;">—</span>';
     return`<tr>
-      <td><div class="store-name">${e.desc}</div>${e.obs?`<div class="desc-name">${e.obs}</div>`:''}</td>
-      <td><span class="cat-tag ${cat.cls}">${cat.label}</span></td>
-      <td><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parc>1)?`<div class="value-sub">${fmt(e.total)} · <span class="num">${diff+1}/${parc}x</span></div>`:''}</td>
-      <td>${FORMAS[e.forma]||e.forma}${isRec?` <span class="badge badge-rec" style="margin-left:3px">🔄</span>`:''}</td>
-      <td>${banco}</td>
-      <td><button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button></td>
-      <td><div class="action-btns"><button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button><button class="btn-del" onclick="delPessoal('${e.id}')">✕</button></div></td>
+      <td style="width:100%;padding:0!important;display:block!important;margin-bottom:3px;"><span class="store-name">${e.desc}</span>${e.obs?`<span class="desc-name" style="margin-left:5px;">${e.obs}</span>`:''}</td>
+      <td style="padding:0!important;"><span class="cat-tag ${cat.cls}">${cat.label}</span></td>
+      <td style="padding:0!important;"><div class="value-bold">${fmt(valMes)}</div>${(!isRec&&parc>1)?`<div class="value-sub" style="margin-top:6px;padding-top:5px;border-top:1.5px dashed var(--blush);line-height:1.4;color:var(--dusty);">${fmt(e.total)}&nbsp;<span style="opacity:0.7;">total</span>&nbsp;·&nbsp;<span class="num">${diff+1}/${parc}x</span></div>`:''}</td>
+      <td style="padding:0!important;">${FORMAS[e.forma]||e.forma}${isRec?` <span class="badge badge-rec" style="margin-left:3px">🔄</span>`:''}</td>
+      <td style="padding:0!important;">${banco}</td>
+      <td style="padding:0!important;"><button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button></td>
+      <td style="padding:0!important;margin-left:auto;"><div class="action-btns"><button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button><button class="btn-del" onclick="delPessoal('${e.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
 }
@@ -1268,7 +1279,14 @@ function renderRonaldo(){
     const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit['ronaldo']||0):p.value/((e.payers||[]).length||1);
     tot+=share;
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
-    return`<tr><td><div class="store-name">${e.store}</div><div class="desc-name">${e.desc}</div></td><td>${badge}</td><td><div class="value-sub">${fmt(share)}</div></td></tr>`;
+    return`<tr>
+      <td style="width:100%;padding:0!important;display:block!important;margin-bottom:3px;">
+        <span class="store-name">${e.store}</span>
+        <span class="desc-name" style="margin-left:5px;">${e.desc}</span>
+      </td>
+      <td style="padding:0!important;">${badge}</td>
+      <td style="padding:0!important;margin-left:auto;"><span class="value-sub">${fmt(share)}</span></td>
+    </tr>`;
   }).join('');
   foot.style.display='';
   document.getElementById('ro-cartao-total').innerHTML=fmt(tot);
@@ -1388,11 +1406,15 @@ function renderApto(){
          <span style="font-size:0.72rem;font-weight:600;color:var(--mocha);">⚙️ descontos automáticos</span>
          <button onclick="openDescModal()" style="background:var(--lav-dark);color:white;border:none;border-radius:8px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-size:0.72rem;cursor:pointer;">✏️ gerenciar</button>
        </div>
-       ${getDescAutomaticos().map(dc=>`
-         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:6px;">
+       ${getDescAutomaticos().map(dc=>{
+         const vv=calcDescValorMes(dc,month);
+         const isSub=(dc.modo||'sub')==='sub';
+         const sinal=isSub?'−':'+';
+         const cor=isSub?'#9b5c5c':'#4a6044';
+         return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;gap:6px;">
            <span style="font-size:0.76rem;color:var(--dark);">${dc.nome}</span>
-           <span style="font-size:0.76rem;font-weight:600;color:#9b5c5c;">−${fmt(calcDescValorMes(dc,month))}</span>
-         </div>`).join('')}
+           <span style="font-size:0.76rem;font-weight:600;color:${cor};">${sinal}${fmt(vv)}</span>
+         </div>`;}).join('')}
        ${getDescAutomaticos().length===0?'<div style="font-size:0.74rem;color:var(--rose);font-style:italic;">nenhum desconto cadastrado</div>':''}
        <div style="border-top:1px solid var(--blush);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;">
          <span style="font-size:0.74rem;color:var(--mocha);">total descontos</span>
@@ -1558,7 +1580,7 @@ function renderDescLista(){
           style="${IS}">
         <button onclick="delDescItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:1rem;padding:4px 8px;border-radius:7px;flex-shrink:0;" onmouseover="this.style.background='#fce8e8'" onmouseout="this.style.background='none'">✕</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:${tipo==='parcelado'?'8':'0'}px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">tipo</div>
           <select onchange="_descItems[${i}].tipo=this.value;renderDescLista()" style="${IS}">
             <option value="fixo"${tipo==='fixo'?' selected':''}>🔄 fixo (todo mês)</option>
@@ -1569,7 +1591,14 @@ function renderDescLista(){
           <input type="number" step="0.01" value="${d.valor||''}" placeholder="0,00" oninput="_descItems[${i}].valor=parseFloat(this.value)||0" style="${IS}">
         </div>
       </div>
-      ${tipo==='parcelado'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="margin-bottom:${tipo==='parcelado'?'8':'0'}px;">
+        <div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">operação no aluguel</div>
+        <select onchange="_descItems[${i}].modo=this.value" style="${IS}">
+          <option value="sub"${(d.modo||'sub')==='sub'?' selected':''}>➖ subtrai do aluguel</option>
+          <option value="add"${d.modo==='add'?' selected':''}>➕ soma ao aluguel</option>
+        </select>
+      </div>
+      ${tipo==='parcelado'?`<div style="display:flex;flex-direction:column;gap:8px;">
         <div><div style="font-size:0.63rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);margin-bottom:3px;font-weight:500;">mês início</div>
           <input type="month" value="${d.inicio||TODAY}" oninput="_descItems[${i}].inicio=this.value;renderDescLista()" style="${IS}">
         </div>
@@ -1582,7 +1611,7 @@ function renderDescLista(){
   }).join('');
 }
 function addDescItem(){
-  _descItems.push({id:'desc_'+Date.now(),nome:'',tipo:'fixo',valor:0});
+  _descItems.push({id:'desc_'+Date.now(),nome:'',tipo:'fixo',valor:0,modo:'sub'});
   renderDescLista();
 }
 function delDescItem(i){
