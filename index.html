@@ -123,25 +123,13 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 .summary-card{background:var(--white);border-radius:20px;padding:28px 20px 22px;box-shadow:0 4px 18px var(--shadow);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .summary-card:hover{transform:translateY(-2px);box-shadow:0 6px 22px var(--shadow-md);}
 .summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;border-radius:16px 16px 0 0;}
-.card-duanni{background:linear-gradient(160deg,#fff5f7 0%,var(--white) 60%);}
-.card-duanni::before{background:linear-gradient(90deg,#e8a0b0,#f0c4cc);}
-.card-alan{background:linear-gradient(160deg,#f3f8f2 0%,var(--white) 60%);}
-.card-alan::before{background:linear-gradient(90deg,#8aaa82,#b0cc9e);}
-.card-ronaldo{background:linear-gradient(160deg,#f8f5f2 0%,var(--white) 60%);}
-.card-ronaldo::before{background:linear-gradient(90deg,#b8967a,#d4b89a);}
-.card-sueli{background:linear-gradient(160deg,#f8f4ff 0%,var(--white) 60%);}
-.card-sueli::before{background:linear-gradient(90deg,#c4a0d4,#d8bce8);}
+/* card backgrounds gerados dinamicamente por injectPersonaCSS() */
 .summary-card.active-filter{box-shadow:0 0 0 3px var(--rose),0 6px 22px var(--shadow-md);transform:translateY(-2px);}
 .p-emoji{font-size:2.6rem;margin-bottom:12px;display:block;line-height:1;}
 .p-name{font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:600;margin-bottom:12px;}
 .p-total{font-size:1.55rem;font-weight:700;line-height:1.1;}
 .p-total span{font-size:0.95rem;font-family:'DM Sans',sans-serif;font-weight:400;opacity:0.7;}
 .card-hint{display:none;}
-.card-duanni .p-total{color:#c4607a;}
-.card-alan .p-total{color:#5a8050;}
-.card-ronaldo .p-total{color:#8a6040;}
-.card-sueli .p-total{color:#9060a8;}
-
 
 /* TABLE */
 .table-section{background:var(--white);border-radius:20px;box-shadow:0 3px 18px var(--shadow);overflow:hidden;margin-bottom:22px;}
@@ -169,10 +157,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 .badge-pago{background:#e8f0e8;color:#4a6044;}
 .badge-pendente{background:#fce8e8;color:#9b5c5c;}
 .person-tag{display:inline-flex;align-items:center;gap:3px;border-radius:10px;padding:2px 8px;font-size:0.72rem;font-weight:500;margin:1px;}
-.tag-duanni{background:#fce8e8;color:#9b5c5c;}
-.tag-alan{background:var(--sage-light);color:#4a6044;}
-.tag-ronaldo{background:#f0e8de;color:#7a5535;}
-.tag-sueli{background:#f0e8f4;color:#7a4a80;}
+/* tag colors geradas dinamicamente por injectPersonaCSS() */
 .cat-tag{border-radius:10px;padding:2px 8px;font-size:0.72rem;font-weight:500;}
 .cat-presentes{background:#fce8f4;color:#9b4a7a;}
 .cat-compras{background:#e8eeff;color:#4a5a9b;}
@@ -324,6 +309,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
   .banner .b-month{align-self:flex-end;margin-top:-8px;}
 }
 </style>
+<style id="dynamic-persona-css"></style>
 </head>
 <body>
 
@@ -341,10 +327,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
         <span class="t-lock" id="t-lock-icon">🔒</span><span class="t-arrow">›</span>
       </button>
       <div class="acc-body" id="acc-pessoal-body">
-        <button class="nav-item" id="nav-duanni" onclick="showPage('duanni')"><span class="ni-emoji">🌸</span> Duanni</button>
-        <button class="nav-item" id="nav-alan" onclick="showPage('alan')"><span class="ni-emoji">⚡</span> Alan</button>
-        <button class="nav-item" id="nav-ronaldo" onclick="showPage('ronaldo')"><span class="ni-emoji">🏔️</span> Ronaldo</button>
-        <button class="nav-item" id="nav-apto" onclick="showPage('apto')"><span class="ni-emoji">🏠</span> Apartamento</button>
+        <!-- preenchido por buildSidebarPersonal() -->
       </div>
     </div>
   </nav>
@@ -371,24 +354,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <button class="btn-back" onclick="clearFilter()">← ver todos</button>
   </div>
   <main>
-    <div class="summary-grid">
-      <div class="summary-card card-duanni" id="card-duanni" onclick="setFilter('duanni')">
-        <span class="p-emoji">🌸</span><div class="p-name">Duanni</div>
-        <div class="p-total" id="total-duanni">R$ 0,00 <span>/mês</span></div><div class="card-hint">filtrar →</div>
-      </div>
-      <div class="summary-card card-alan" id="card-alan" onclick="setFilter('alan')">
-        <span class="p-emoji">⚡</span><div class="p-name">Alan</div>
-        <div class="p-total" id="total-alan">R$ 0,00 <span>/mês</span></div><div class="card-hint">filtrar →</div>
-      </div>
-      <div class="summary-card card-ronaldo" id="card-ronaldo" onclick="setFilter('ronaldo')">
-        <span class="p-emoji">🏔️</span><div class="p-name">Ronaldo</div>
-        <div class="p-total" id="total-ronaldo">R$ 0,00 <span>/mês</span></div><div class="card-hint">filtrar →</div>
-      </div>
-      <div class="summary-card card-sueli" id="card-sueli" onclick="setFilter('sueli')">
-        <span class="p-emoji">🌷</span><div class="p-name">Sueli</div>
-        <div class="p-total" id="total-sueli">R$ 0,00 <span>/mês</span></div><div class="card-hint">filtrar →</div>
-      </div>
-    </div>
+    <div class="summary-grid" id="summary-grid-container"></div>
     <div class="banner mocha">
       <div><div class="b-label" id="c-fat-label">💸 fatura total do mês</div><div class="b-total" id="c-fat-total">R$ 0,00</div></div>
       <div class="b-month" id="c-fat-month">—</div>
@@ -396,7 +362,10 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <div class="table-section">
       <div class="table-header">
         <h2 id="c-table-title">✨ despesas do mês</h2>
-        <button class="btn-add btn-dark" onclick="openCartaoModal()">+ adicionar</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-add" style="background:var(--cream);color:var(--mocha);border:1px solid var(--blush);" onclick="openPessoasModal()" title="editar pessoas">👥</button>
+          <button class="btn-add btn-dark" onclick="openCartaoModal()">+ adicionar</button>
+        </div>
       </div>
       <table class="tbl-cartao"><thead><tr>
         <th>🏪 nome / despesa</th><th>🔢 parcelas</th><th>💰 total</th>
@@ -415,8 +384,8 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <button class="btn-pill btn-today" id="d-btn-today" onclick="goToday('d-month-sel','d-btn-today',renderDuanni)">↩ hoje</button>
   </div>
   <main>
-    <div class="banner lav">
-      <div><div class="b-label">🌸 total da Duanni no mês</div><div class="b-total" id="d-total">R$ 0,00</div></div>
+    <div class="banner banner-pessoa-duanni" id="banner-duanni">
+      <div><div class="b-label" id="d-banner-label">🌸 total da Duanni no mês</div><div class="b-total" id="d-total">R$ 0,00</div></div>
       <div class="b-month" id="d-month-lbl">—</div>
     </div>
     <div class="breakdown-grid cols3">
@@ -424,14 +393,18 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
       <div class="bc"><div class="bc-icon">🏠</div><div class="bc-label">apartamento</div><div class="bc-value" id="d-apto-val">R$ 0,00</div><div class="bc-sub" id="d-apto-sub">—</div></div>
       <div class="bc"><div class="bc-icon">🛍️</div><div class="bc-label">despesas pessoais</div><div class="bc-value" id="d-pessoal-val">R$ 0,00</div><div class="bc-sub">lançamentos manuais</div></div>
     </div>
+    <div id="duanni-custom-cards-top"></div>
     <div class="table-section">
       <div class="table-header">
         <h2>🌸 despesas pessoais</h2>
-        <button class="btn-add btn-lav" onclick="openPessoalModal()">+ adicionar</button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-add btn-lav" onclick="openPessoalModal()">+ adicionar</button>
+        </div>
       </div>
       <div id="pessoal-table"></div>
       <div id="pessoal-empty" class="empty-state"><div class="icon">🌸</div><p>nenhuma despesa pessoal neste mês...</p></div>
     </div>
+    <div id="duanni-custom-cards-btn"></div>
   </main>
 </div>
 
@@ -443,29 +416,32 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <button class="btn-pill btn-today" id="al-btn-today" onclick="goToday('al-month-sel','al-btn-today',renderAlan)">↩ hoje</button>
   </div>
   <main>
-    <div class="banner alan">
-      <div><div class="b-label">⚡ total do Alan no mês</div><div class="b-total" id="al-total">R$ 0,00</div></div>
+    <div class="banner banner-pessoa-alan" id="banner-alan">
+      <div><div class="b-label" id="al-banner-label">⚡ total do Alan no mês</div><div class="b-total" id="al-total">R$ 0,00</div></div>
       <div class="b-month" id="al-month-lbl">—</div>
     </div>
     <div class="breakdown-grid cols2">
       <div class="bc"><div class="bc-icon">💳</div><div class="bc-label">Cartão PagBank</div><div class="bc-value" id="al-cartao-val">R$ 0,00</div><div class="bc-sub">parte do Alan</div></div>
       <div class="bc"><div class="bc-icon">🏠</div><div class="bc-label">apartamento</div><div class="bc-value" id="al-apto-val">R$ 0,00</div><div class="bc-sub" id="al-apto-sub">—</div></div>
     </div>
+    <div id="alan-custom-cards-top"></div>
 
     <!-- card 💕 cartão do amor -->
     <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;">
       <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
-        <div>
-          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:2px;">💕 cartão do meu amor</div>
-          <div style="font-size:0.76rem;color:var(--dusty);font-style:italic;">despesas minhas no cartão dele · subtraído do total</div>
+        <div style="flex:1;min-width:0;">
+          <div id="al-devo-titulo" style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:2px;">💕 cartão do meu amor</div>
+          <div id="al-devo-legenda" style="font-size:0.76rem;color:var(--dusty);font-style:italic;">despesas minhas no cartão dele · subtraído do total</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
           <span id="al-devo-val" style="font-family:var(--font-num);font-size:1.3rem;font-weight:700;color:#9b5c5c;">—</span>
-          <button onclick="openDevoModal()" style="background:var(--blush);color:var(--mocha);border:none;border-radius:8px;padding:4px 10px;font-size:0.76rem;cursor:pointer;">✏️</button>
+          <button onclick="openDevoRenameModal()" title="renomear" style="background:var(--cream);color:var(--mocha);border:1px solid var(--blush);border-radius:8px;padding:4px 8px;font-size:0.72rem;cursor:pointer;">✏️</button>
+          <button onclick="openDevoModal()" title="editar despesas" style="background:var(--blush);color:var(--mocha);border:none;border-radius:8px;padding:4px 10px;font-size:0.76rem;cursor:pointer;">📋</button>
         </div>
       </div>
       <div id="devo-lista" style="padding:0 18px;"></div>
     </div>
+    <div id="alan-custom-cards-btn"></div>
   </main>
 </div>
 
@@ -477,31 +453,16 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <button class="btn-pill btn-today" id="ro-btn-today" onclick="goToday('ro-month-sel','ro-btn-today',renderRonaldo)">↩ hoje</button>
   </div>
   <main>
-    <div class="banner ron">
-      <div><div class="b-label">🏔️ total do Ronaldo no mês</div><div class="b-total" id="ro-total">R$ 0,00</div></div>
+    <div class="banner banner-pessoa-ronaldo" id="banner-ronaldo">
+      <div><div class="b-label" id="ro-banner-label">🏔️ total do Ronaldo no mês</div><div class="b-total" id="ro-total">R$ 0,00</div></div>
       <div class="b-month" id="ro-month-lbl">—</div>
     </div>
-    <div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;">
-      <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
-        <span id="ro-claro-nome" style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--mocha);">🌐 Internet Claro</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span id="ro-claro-val" style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--dark);">—</span>
-          <button onclick="toggleInlineEdit('claro-edit-panel')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:8px;padding:4px 10px;font-size:0.76rem;cursor:pointer;">✏️</button>
-        </div>
-      </div>
-      <div id="claro-edit-panel" style="display:none;padding:12px 16px;">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-          <input id="claro-nome-input" type="text" class="inline-input" style="margin:0;flex:1;" placeholder="nome (ex: Internet Claro)">
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input id="claro-input" type="number" step="0.01" class="inline-input" style="margin:0;" placeholder="ex: 135,66">
-          <button onclick="saveClaro()" style="background:#7a5535;color:white;border:none;border-radius:10px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;white-space:nowrap;">💾</button>
-          <button onclick="toggleInlineEdit('claro-edit-panel')" style="background:var(--blush);color:var(--mocha);border:none;border-radius:10px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;">✕</button>
-        </div>
-      </div>
-    </div>
+
+    <div id="ronaldo-custom-cards-top"></div>
     <div class="table-section" id="ro-cartao-section">
-      <div class="table-header"><h2>🏔️ despesas no cartão</h2></div>
+      <div class="table-header">
+        <h2>🏔️ despesas no cartão</h2>
+      </div>
       <div id="ro-cartao-table"></div>
       <div id="ro-cartao-foot" style="display:none;background:var(--cream);border-top:2px solid var(--blush);padding:11px 16px;display:none;justify-content:space-between;align-items:center;">
         <span style="font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--mocha);font-weight:500;">total do cartão</span>
@@ -509,6 +470,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
       </div>
       <div id="ro-cartao-empty" class="empty-state"><div class="icon">🏔️</div><p>nenhuma despesa neste mês...</p></div>
     </div>
+    <div id="ronaldo-custom-cards-btn"></div>
   </main>
 </div>
 
@@ -538,11 +500,41 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
   </main>
 </div>
 
+<div id="dynamic-pages-container"></div>
+
+<!-- MODAL ABAS -->
+<div class="overlay" id="ov-abas" onclick="if(event.target===this)closeAbasModal()">
+  <div class="modal" style="max-width:460px;">
+    <h3>📑 gerenciar abas</h3>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Crie, edite ou remova abas pessoais. As abas aparecem no menu lateral.</p>
+    <div id="abas-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+    <button onclick="addAba()" style="width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;margin-bottom:16px;">+ nova aba</button>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAbasModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveAbas()">💾 salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PESSOAS -->
+<div class="overlay" id="ov-pessoas" onclick="if(event.target===this)closePessoasModal()">
+  <div class="modal" style="max-width:420px;">
+    <h3>👥 pessoas & filtros</h3>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Edite os nomes, emojis e cores. A cor define o visual do card e das tags.</p>
+    <div id="pessoas-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+    <button onclick="addPessoa()" style="width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;margin-bottom:16px;">+ adicionar pessoa</button>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closePessoasModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="savePessoas()">💾 salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- PASSWORD MODAL -->
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <h3>🔒 área pessoal</h3><p>senha para continuar</p>
-    <input class="pw-input" id="pw-input" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="••••" onkeydown="if(event.key==='Enter')checkPassword()">
+    <input class="pw-input" id="pw-input" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="••••" oninput="if(this.value.length===4)checkPassword()" onkeydown="if(event.key==='Enter')checkPassword()">
     <div class="pw-error" id="pw-error"></div>
     <div class="pw-actions">
       <button class="pw-btn pw-cancel" onclick="closePwModal()">cancelar</button>
@@ -555,7 +547,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 <!-- MODAL CARTÃO DO AMOR -->
 <div class="overlay" id="ov-devo" onclick="if(event.target===this)closeDevoModal()">
   <div class="modal" style="max-width:460px;">
-    <h3>💕 cartão do meu amor</h3>
+    <h3 id="devo-modal-titulo">💕 cartão do meu amor</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:6px;">Selecione as despesas das suas pessoais que foram no cartão dele. As parcelas serão distribuídas automaticamente mês a mês.</p>
     <div id="devo-modal-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:340px;overflow-y:auto;"></div>
     <div style="font-size:0.76rem;color:var(--dusty);padding:8px 12px;background:var(--cream);border-radius:10px;margin-bottom:14px;">
@@ -564,6 +556,43 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeDevoModal()">cancelar</button>
       <button class="btn-modal-save btn-dark" onclick="saveDevoModal()">💾 salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CUSTOM CARD -->
+<div class="overlay" id="ov-custom-card" onclick="if(event.target===this)closeCustomCardModal()">
+  <div class="modal" style="max-width:400px;">
+    <h3>🃏 card personalizado</h3>
+    <input type="hidden" id="cc-aba-id">
+    <input type="hidden" id="cc-card-id">
+    <div class="form-row"><label>✏️ título</label><input id="cc-titulo" type="text" placeholder="ex: 💕 cartão do amor"></div>
+    <div class="form-row"><label>📝 legenda (opcional)</label><input id="cc-legenda" type="text" placeholder="ex: despesas no cartão dele"></div>
+    <div class="form-grid">
+      <div class="form-row"><label>💰 valor (R$)</label><input id="cc-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-row"><label>➕➖ operação</label>
+        <select id="cc-modo" style="font-family:'DM Sans',sans-serif;font-size:0.87rem;border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;background:var(--cream);color:var(--dark);outline:none;width:100%;">
+          <option value="sub">➖ subtrai do total</option>
+          <option value="add">➕ soma ao total</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeCustomCardModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveCustomCard()">💾 salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RENAME DEVO CARD -->
+<div class="overlay" id="ov-devo-rename" onclick="if(event.target===this)closeDevoRenameModal()">
+  <div class="modal" style="max-width:400px;">
+    <h3>✏️ renomear card</h3>
+    <div class="form-row"><label>título</label><input id="devo-rename-titulo" type="text" placeholder="ex: 💕 cartão do meu amor"></div>
+    <div class="form-row"><label>legenda</label><input id="devo-rename-legenda" type="text" placeholder="ex: despesas no cartão dele"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeDevoRenameModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveDevoRename()">💾 salvar</button>
     </div>
   </div>
 </div>
@@ -646,12 +675,7 @@ td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
       <div class="form-row"><label>📆 até quando? (vazio = sem fim)</label><select id="cm-rec-fim"><option value="">sem fim</option></select></div>
     </div>
     <div class="form-row"><label>👤 quem paga?</label>
-      <div class="payers-grid">
-        <label class="payer-option"><input type="checkbox" value="duanni"><span>🌸</span> Duanni</label>
-        <label class="payer-option"><input type="checkbox" value="alan"><span>⚡</span> Alan</label>
-        <label class="payer-option"><input type="checkbox" value="ronaldo"><span>🏔️</span> Ronaldo</label>
-        <label class="payer-option"><input type="checkbox" value="sueli"><span>🌷</span> Sueli</label>
-      </div>
+      <div class="payers-grid" id="cm-payers-grid"></div>
     </div>
     <div class="form-row"><label>⚖️ divisão</label>
       <div class="toggle-row">
@@ -751,10 +775,9 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SENHA='2710';
 const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
-// legado - mantido apenas para migração automática em getDescAutomaticos()
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},claro:0,devoIds:[],divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
+let DB={cartao:[],pessoal:[],apto:{},devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
 let saveTimer=null;
 let cmSplitMode='equal',cmExpType='parc',cmEditId=null;
 let pmExpType='parc',pmEditId=null;
@@ -762,12 +785,32 @@ let personFilter=null;
 let pessoalUnlocked=false,pendingPage=null;
 
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const PC={
-  duanni:{emoji:'🌸',label:'Duanni',tag:'tag-duanni'},
-  alan:{emoji:'⚡',label:'Alan',tag:'tag-alan'},
-  ronaldo:{emoji:'🏔️',label:'Ronaldo',tag:'tag-ronaldo'},
-  sueli:{emoji:'🌷',label:'Sueli',tag:'tag-sueli'}
-};
+
+const DEFAULT_PESSOAS=[
+  {id:'duanni',emoji:'🌸',label:'Duanni',cor:'#fce8e8',corText:'#c4607a'},
+  {id:'alan',  emoji:'⚡',label:'Alan',  cor:'#edf4eb',corText:'#5a8050'},
+  {id:'ronaldo',emoji:'🏔️',label:'Ronaldo',cor:'#f5f0eb',corText:'#8a6040'},
+  {id:'sueli', emoji:'🌷',label:'Sueli', cor:'#f5f0ff',corText:'#9060a8'}
+];
+function getPessoas(){return DB.pessoas||DEFAULT_PESSOAS;}
+function getPessoaById(id){return getPessoas().find(p=>p.id===id)||{id,emoji:'👤',label:id,cor:'#f5f5f5',corText:'#666'};}
+
+const DEFAULT_ABAS=[
+  {id:'duanni', emoji:'🌸', label:'Duanni',    bannerClass:'lav',  blocos:['cartao','apto','pessoal']},
+  {id:'alan',   emoji:'⚡', label:'Alan',      bannerClass:'alan', blocos:['cartao','apto','custom_cards']},
+  {id:'ronaldo',emoji:'🏔️',label:'Ronaldo',   bannerClass:'ron',  blocos:['cartao_proprio']},
+  {id:'apto',   emoji:'🏠', label:'Apartamento',bannerClass:'sage', blocos:['apto_full']}
+];
+function getAbas(){
+  const base=DB.abas||DEFAULT_ABAS;
+  // Sincronizar emoji+label das abas que correspondem a uma pessoa editável
+  return base.map(a=>{
+    const pessoa=getPessoas().find(p=>p.id===a.id);
+    if(pessoa)return{...a,emoji:pessoa.emoji,label:pessoa.label};
+    return a;
+  });
+}
+
 const CATS={
   presentes:{label:'🎁 Presentes',cls:'cat-presentes'},
   compras:{label:'🛍️ Compras',cls:'cat-compras'},
@@ -787,7 +830,374 @@ const TODAY=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 function addMos(y,m,n){let ny=y,nm=m+n;while(nm>12){nm-=12;ny++;}while(nm<1){nm+=12;ny--;}return`${ny}-${String(nm).padStart(2,'0')}`;}
 function shiftM(ym,n){const[y,m]=ym.split('-').map(Number);return addMos(y,m,n);}
 function getML(v){if(!v)return'—';const[y,m]=v.split('-').map(Number);return`${MN[m-1]} ${y}`;}
+function getPC(){
+  const pc={};
+  getPessoas().forEach(p=>{pc[p.id]={emoji:p.emoji,label:p.label,tag:'tag-'+p.id,cor:p.cor,corText:p.corText};});
+  return pc;
+}
 function fmt(v){return'<span class="num">R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span>';}
+
+// ══ PERSONAS DINÂMICAS ══
+// Converte hex #rrggbb para objeto {r,g,b}
+function hexToRgb(hex){
+  const h=hex.replace('#','');
+  const n=h.length===3?h.split('').map(c=>c+c):h.match(/.{2}/g);
+  return{r:parseInt(n[0],16),g:parseInt(n[1],16),b:parseInt(n[2],16)};
+}
+// Mistura cor com branco (amount 0=original, 1=branco)
+function lighten(hex,amt){
+  const{r,g,b}=hexToRgb(hex);
+  const lr=Math.round(r+(255-r)*amt);
+  const lg=Math.round(g+(255-g)*amt);
+  const lb=Math.round(b+(255-b)*amt);
+  return`rgb(${lr},${lg},${lb})`;
+}
+// Escurece (amount 0=original, 1=preto)
+function darken(hex,amt){
+  const{r,g,b}=hexToRgb(hex);
+  return`rgb(${Math.round(r*(1-amt))},${Math.round(g*(1-amt))},${Math.round(b*(1-amt))})`;
+}
+
+function injectPersonaCSS(){
+  const pessoas=getPessoas();
+  let css='';
+  pessoas.forEach(p=>{
+    const id=p.id;
+    const tc=p.corText||'#555'; // cor principal (escolhida pelo usuário)
+    const cardBg=lighten(tc,0.88);  // fundo muito claro do card
+    const cardBg2=lighten(tc,0.96); // quase branco para o degradê
+    const barLight=lighten(tc,0.3); // barra ::before mais clara
+    const tagBg=lighten(tc,0.85);   // fundo da tag
+    // Banner das abas pessoais (igual ao .banner.lav etc mas dinâmico)
+    const bDark=darken(tc,0.25);    // cor mais escura para início do degradê
+    const bMid=tc;                  // cor principal no meio
+    const bLight=lighten(tc,0.18);  // cor mais clara no fim
+    const{r,g,b}=hexToRgb(tc);
+    const shadow=`rgba(${r},${g},${b},0.30)`;
+    css+=`.banner-pessoa-${id}{background:linear-gradient(135deg,${bDark},${bMid},${bLight});box-shadow:0 5px 20px ${shadow};}`;
+    // Summary card
+    css+=`.card-${id}{background:linear-gradient(160deg,${cardBg} 0%,${cardBg2} 60%);}`;
+    css+=`.card-${id}::before{background:linear-gradient(90deg,${tc},${barLight});}`;
+    css+=`.card-${id} .p-total{color:${tc};}`;
+    // Person tag
+    css+=`.tag-${id}{background:${tagBg};color:${tc};}`;
+  });
+  document.getElementById('dynamic-persona-css').textContent=css;
+}
+
+function buildSummaryGrid(){
+  const pessoas=getPessoas();
+  const grid=document.getElementById('summary-grid-container');
+  if(!grid)return;
+  grid.innerHTML=pessoas.map(p=>`
+    <div class="summary-card card-${p.id}" id="card-${p.id}" onclick="setFilter('${p.id}')">
+      <span class="p-emoji">${p.emoji}</span>
+      <div class="p-name">${p.label}</div>
+      <div class="p-total" id="total-${p.id}">R$ 0,00 <span>/mês</span></div>
+    </div>`).join('');
+}
+
+function buildPayersGrid(){
+  const pessoas=getPessoas();
+  const grid=document.getElementById('cm-payers-grid');
+  if(!grid)return;
+  grid.innerHTML=pessoas.map(p=>`
+    <label class="payer-option">
+      <input type="checkbox" value="${p.id}">
+      <span>${p.emoji}</span> ${p.label}
+    </label>`).join('');
+}
+
+function openPessoasModal(){
+  renderPessoasLista();
+  document.getElementById('ov-pessoas').classList.add('active');
+}
+function closePessoasModal(){document.getElementById('ov-pessoas').classList.remove('active');}
+
+let _pessoasEdit=[];
+function renderPessoasLista(reinit){
+  if(reinit!==false)_pessoasEdit=JSON.parse(JSON.stringify(getPessoas()));
+  const lista=document.getElementById('pessoas-lista');
+  if(!lista)return;
+  lista.innerHTML=_pessoasEdit.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--cream);border-radius:12px;border:1.5px solid var(--blush);">
+      <input type="text" value="${p.emoji}" maxlength="2"
+        style="width:38px;text-align:center;font-size:1.2rem;border:1.5px solid var(--blush);border-radius:8px;padding:4px;background:var(--white);outline:none;"
+        oninput="_pessoasEdit[${i}].emoji=this.value">
+      <input type="text" value="${p.label}" placeholder="nome"
+        style="flex:1;font-family:'DM Sans',sans-serif;font-size:0.87rem;border:1.5px solid var(--blush);border-radius:8px;padding:6px 10px;background:var(--white);outline:none;color:var(--dark);"
+        oninput="_pessoasEdit[${i}].label=this.value">
+      <input type="color" value="${p.corText||'#888888'}" title="cor"
+        style="width:32px;height:32px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:var(--cream);"
+        oninput="_pessoasEdit[${i}].corText=this.value;_pessoasEdit[${i}].cor=this.value+'22';injectPersonaCSS();">
+      ${_pessoasEdit.length>1?`<button onclick="delPessoa(${i})" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:1rem;padding:4px;">✕</button>`:''}
+    </div>`).join('');
+}
+function delPessoa(i){_pessoasEdit.splice(i,1);renderPessoasLista(false);}
+function addPessoa(){
+  _pessoasEdit.push({id:'p_'+Date.now(),emoji:'👤',label:'Nova pessoa',cor:'#e8e8e8',corText:'#888888'});
+  renderPessoasLista(false);
+}
+function savePessoas(){
+  if(_pessoasEdit.some(p=>!p.label.trim())){toast('⚠️ todos precisam ter nome!');return;}
+  DB.pessoas=_pessoasEdit.map(p=>({...p,label:p.label.trim()}));
+  injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
+  saveData();renderCartao();closePessoasModal();toast('✅ pessoas salvas!');
+}
+
+// ══ ABAS DINÂMICAS ══
+const BANNER_CLASSES=['lav','alan','ron','sage','mocha'];
+const BANNER_COLORS={lav:'#b8aad4',alan:'#7a9070',ron:'#7a5850',sage:'#243560',mocha:'#6b35a8'};
+
+function buildSidebarPersonal(){
+  const abas=getAbas();
+  const body=document.getElementById('acc-pessoal-body');
+  if(!body)return;
+  body.innerHTML=abas.map(a=>{
+    // abas especiais fixas sempre no nav
+    return`<button class="nav-item" id="nav-${a.id}" onclick="showPage('${a.id}')"><span class="ni-emoji">${a.emoji}</span> ${a.label}</button>`;
+  }).join('');
+}
+
+function buildDynamicPages(){
+  const abas=getAbas();
+  const container=document.getElementById('dynamic-pages-container');
+  if(!container)return;
+  // Remover apenas páginas dinâmicas antigas (não as fixas hardcoded)
+  container.querySelectorAll('.dynamic-page').forEach(el=>el.remove());
+  abas.forEach(aba=>{
+    // Abas fixas: duanni, alan, ronaldo, apto — não recriar (já existem no HTML)
+    if(['duanni','alan','ronaldo','apto'].includes(aba.id))return;
+    const page=document.createElement('div');
+    page.className='page dynamic-page';
+    page.id='page-'+aba.id;
+    const bc=aba.bannerClass||'mocha';
+    const blocos=(aba.blocos||['pessoal']);
+    let html_inner=`
+      <div class="month-bar" style="border-bottom-color:${BANNER_COLORS[bc]||'#888'};">
+        <label>📅 mês</label>
+        <select id="${aba.id}-month-sel" onchange="renderDynamicPage('${aba.id}')"></select>
+        <button class="btn-pill btn-today" id="${aba.id}-btn-today" onclick="goToday('${aba.id}-month-sel','${aba.id}-btn-today',()=>renderDynamicPage('${aba.id}'))">↩ hoje</button>
+      </div>
+      <main>
+        <div class="banner ${bc}">
+          <div><div class="b-label">${aba.emoji} total de ${aba.label} no mês</div><div class="b-total" id="${aba.id}-total">R$ 0,00</div></div>
+          <div class="b-month" id="${aba.id}-month-lbl">—</div>
+        </div>
+        <div class="breakdown-grid" id="${aba.id}-breakdown"></div>`;
+
+    // Bloco: despesas no cartão compartilhado
+    if(blocos.includes('cartao')){
+      html_inner+=`
+        <div class="bc-cartao-mini" id="${aba.id}-cartao-section" style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;padding:14px 18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--mocha);font-weight:500;">💳 Cartão Compartilhado</div>
+            <div class="bc-value" id="${aba.id}-cartao-val">—</div>
+          </div>
+        </div>`;
+    }
+
+    // Bloco: despesas pessoais
+    if(blocos.includes('pessoal')){
+      html_inner+=`
+        <div class="table-section">
+          <div class="table-header">
+            <h2>${aba.emoji} despesas pessoais</h2>
+            <button class="btn-add btn-dark" onclick="openPessoalModal()">+ adicionar</button>
+          </div>
+          <div id="${aba.id}-pessoal-table"></div>
+          <div id="${aba.id}-pessoal-empty" class="empty-state"><div class="icon">${aba.emoji}</div><p>nenhuma despesa neste mês...</p></div>
+        </div>`;
+    }
+
+    // Bloco: custom cards
+    if(blocos.includes('custom_cards')){
+      html_inner+=`<div id="${aba.id}-custom-cards"></div>`;
+    }
+
+    html_inner+=`</main>`;
+    page.innerHTML=html_inner;
+    container.appendChild(page);
+  });
+  // Popular selects nas novas páginas
+  rebuildDynamicSelects();
+}
+
+function rebuildDynamicSelects(){
+  const abas=getAbas().filter(a=>!['duanni','alan','ronaldo','apto'].includes(a.id));
+  const cy=NOW.getFullYear(),cm=NOW.getMonth()+1;
+  const meses=[-1,0,1,2,3].map(n=>shiftM(TODAY,n));
+  let opts='';meses.forEach(v=>{const[y,m]=v.split('-').map(Number);opts+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
+  abas.forEach(a=>{
+    const sel=document.getElementById(a.id+'-month-sel');
+    if(sel){sel.innerHTML=opts;sel.value=TODAY;}
+  });
+}
+
+// ══ CUSTOM CARDS ══
+function getCustomCards(abaId){return(DB.customCards||{})[abaId]||[];}
+function openCustomCardModal(abaId, cardId){
+  document.getElementById('cc-aba-id').value=abaId;
+  document.getElementById('cc-card-id').value=cardId||'';
+  const cards=getCustomCards(abaId);
+  const card=cardId?cards.find(c=>c.id===cardId):null;
+  document.getElementById('cc-titulo').value=card?card.titulo:'';
+  document.getElementById('cc-legenda').value=card?card.legenda:'';
+  document.getElementById('cc-valor').value=card?card.valor:'';
+  document.getElementById('cc-modo').value=card?card.modo:'sub';
+  document.getElementById('ov-custom-card').classList.add('active');
+}
+function closeCustomCardModal(){document.getElementById('ov-custom-card').classList.remove('active');}
+// ══ CUSTOM CARDS — função unificada (abas fixas e dinâmicas) ══
+function renderCustomCards(abaId, total){
+  // cards ficam no topo (abaixo do banner), botão fica no final
+  const topContainer=document.getElementById(abaId+'-custom-cards-top');
+  const btnContainer=document.getElementById(abaId+'-custom-cards-btn');
+  // fallback para container único (abas dinâmicas)
+  const container=topContainer||document.getElementById(abaId+'-custom-cards');
+  if(!container)return total;
+  const cards=getCustomCards(abaId);
+  let adj=total;
+  const cardsHtml=cards.map(card=>{
+    if(card.modo==='sub')adj-=(card.valor||0);else adj+=(card.valor||0);
+    const sinal=card.modo==='sub'?'−':'+';
+    const cor=card.modo==='sub'?'#9b5c5c':'#4a8050';
+    return`<div style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:22px;">
+      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--blush);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:500;margin-bottom:2px;">${card.titulo}</div>
+          ${card.legenda?`<div style="font-size:0.76rem;color:var(--dusty);font-style:italic;">${card.legenda}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span style="font-family:var(--font-num);font-size:1.1rem;font-weight:700;color:${cor};">${sinal} ${fmt(card.valor||0)}</span>
+          <button onclick="openCustomCardModal('${abaId}','${card.id}')" style="background:var(--cream);color:var(--mocha);border:1px solid var(--blush);border-radius:8px;padding:4px 8px;font-size:0.72rem;cursor:pointer;">✏️</button>
+          <button onclick="delCustomCard('${abaId}','${card.id}')" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:0.9rem;padding:4px;">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  container.innerHTML=cardsHtml;
+  // botão sempre no final
+  const btn=`<div style="text-align:center;padding:8px 0 4px;">
+    <button onclick="openCustomCardModal('${abaId}')" style="background:transparent;color:var(--dusty);border:1px dashed var(--blush);border-radius:20px;padding:5px 18px;font-family:'DM Sans',sans-serif;font-size:0.75rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--sage)'" onmouseout="this.style.borderColor='var(--blush)';this.style.color='var(--dusty)'">+ adicionar card</button>
+  </div>`;
+  if(btnContainer)btnContainer.innerHTML=btn;
+  else container.innerHTML+=btn; // abas dinâmicas: botão junto
+  return adj;
+}
+
+// Deleta card e re-renderiza a aba correta
+function delCustomCard(abaId,cardId){
+  if(!DB.customCards?.[abaId])return;
+  DB.customCards[abaId]=DB.customCards[abaId].filter(c=>c.id!==cardId);
+  saveData();renderPage(abaId);toast('🗑️ removido!');
+}
+function saveCustomCard(){
+  const abaId=document.getElementById('cc-aba-id').value;
+  const cardId=document.getElementById('cc-card-id').value;
+  const titulo=document.getElementById('cc-titulo').value.trim();
+  const legenda=document.getElementById('cc-legenda').value.trim();
+  const valor=parseFloat(document.getElementById('cc-valor').value)||0;
+  const modo=document.getElementById('cc-modo').value;
+  if(!titulo){toast('⚠️ informe o título!');return;}
+  if(!DB.customCards)DB.customCards={};
+  if(!DB.customCards[abaId])DB.customCards[abaId]=[];
+  const cards=DB.customCards[abaId];
+  if(cardId){const i=cards.findIndex(c=>c.id===cardId);if(i>-1)cards[i]={...cards[i],titulo,legenda,valor,modo};}
+  else cards.push({id:'cc_'+Date.now(),titulo,legenda,valor,modo});
+  saveData();closeCustomCardModal();renderPage(abaId);toast('✅ card salvo!');
+}
+
+// Dispatcher unificado: renderiza a página certa pelo id
+function renderPage(p){
+  if(p==='duanni')renderDuanni();
+  else if(p==='alan')renderAlan();
+  else if(p==='ronaldo')renderRonaldo();
+  else if(p==='apto')renderApto();
+  else renderDynamicPage(p);
+}
+
+function renderDynamicPage(abaId){
+  const aba=getAbas().find(a=>a.id===abaId);
+  if(!aba)return;
+  const month=(document.getElementById(abaId+'-month-sel')||{}).value||TODAY;
+  const btnToday=document.getElementById(abaId+'-btn-today');
+  if(btnToday)btnToday.classList.toggle('visible',month!==TODAY);
+  const lbl=document.getElementById(abaId+'-month-lbl');
+  if(lbl)lbl.textContent=getML(month);
+
+  let total=0;
+
+  // Cartão
+  if((aba.blocos||[]).includes('cartao')){
+    const cartaoVal=(DB.cartao||[]).reduce((s,e)=>{
+      const p=getInfo(e,month);
+      if(!p||(e.payers||[]).length===0)return s;
+      if(!(e.payers||[]).includes(abaId))return s;
+      const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit[abaId]||0):p.value/((e.payers||[]).length||1);
+      return s+share;
+    },0);
+    total+=cartaoVal;
+    const el=document.getElementById(abaId+'-cartao-val');
+    if(el)el.innerHTML=fmt(cartaoVal);
+  }
+
+  // Pessoal
+  if((aba.blocos||[]).includes('pessoal')){
+    const pessoal=(DB.pessoal||[]).filter(e=>{
+      if(!e.mesInicio)return false;
+      const[iy,im]=e.mesInicio.split('-').map(Number);
+      const[ty,tm]=month.split('-').map(Number);
+      const diff=(ty-iy)*12+(tm-im);
+      return e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
+    });
+    let pessoalTotal=0;
+    const tbl=document.getElementById(abaId+'-pessoal-table');
+    const emp=document.getElementById(abaId+'-pessoal-empty');
+    if(emp)emp.style.display=pessoal.length?'none':'block';
+    if(tbl){
+      tbl.innerHTML=pessoal.map(e=>{
+        const[iy,im]=e.mesInicio.split('-').map(Number);
+        const[ty,tm]=month.split('-').map(Number);
+        const diff=(ty-iy)*12+(tm-im);
+        const isRec=e.tipo==='rec';
+        const parc=isRec?null:(e.parcelas||1);
+        const valMes=parc?e.total/parc:e.total;
+        pessoalTotal+=valMes;
+        const cat=CATS[e.cat]||{label:'📦 Outros',cls:'cat-outros'};
+        const stMes=(e.statusPorMes&&e.statusPorMes[month])||'pendente';
+        const stCls=stMes==='pago'?'badge-pago':'badge-pendente';
+        const stLbl=stMes==='pago'?'✅ Pago':'⏳ Pendente';
+        const banco=e.banco&&BANCOS[e.banco]?`<span class="banco-tag">${BANCOS[e.banco]}</span>`:'';
+        const totalLine=(!isRec&&parc>1)?`<div style="margin-top:5px;font-size:0.74rem;color:var(--dusty);font-family:var(--font-num);">${fmt(e.total)}&nbsp;<span style="opacity:0.7;">total</span>&nbsp;·&nbsp;${diff+1}/${parc}x</div>`:'';
+        return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);">
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
+            <span class="store-name">${e.desc}</span>
+            ${e.obs?`<span class="desc-name">${e.obs}</span>`:''}
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;">
+            <span class="cat-tag ${cat.cls}">${cat.label}</span>
+            <span class="value-bold">${fmt(valMes)}</span>
+            ${banco}
+            <button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button>
+            <div class="action-btns" style="margin-left:auto;"><button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button><button class="btn-del" onclick="delPessoal('${e.id}')">✕</button></div>
+          </div>
+          ${totalLine}
+        </div>`;
+      }).join('');
+    }
+    total+=pessoalTotal;
+  }
+
+  // Custom cards
+  if((aba.blocos||[]).includes('custom_cards')){
+    total=renderCustomCards(abaId,total);
+  }
+  const totalEl=document.getElementById(abaId+'-total');
+  if(totalEl)totalEl.innerHTML=fmt(total);
+}
+
+
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
@@ -816,18 +1226,22 @@ function checkPassword(){
 
 // ══ PAGES ══
 function showPage(p){
-  if(['duanni','alan','ronaldo','apto'].includes(p)&&!pessoalUnlocked){pendingPage=p;openPwModal();return;}
+  // Todas as abas pessoais (fixas + dinâmicas) precisam de senha
+  const todasAbas=getAbas().map(a=>a.id).concat(['duanni','alan','ronaldo','apto']);
+  const precisaSenha=todasAbas.includes(p)&&p!=='cartao';
+  if(precisaSenha&&!pessoalUnlocked){pendingPage=p;openPwModal();return;}
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
+  const pg=document.getElementById('page-'+p);
+  if(pg)pg.classList.add('active');
   document.querySelectorAll('.nav-item,.direct-item').forEach(el=>el.classList.remove('active'));
   const ni=document.getElementById('nav-'+p);if(ni)ni.classList.add('active');
-  document.getElementById('hdr-title').innerHTML=HDR[p]||p;
+  // Título do header
+  const abaConf=getAbas().find(a=>a.id===p);
+  if(abaConf)document.getElementById('hdr-title').innerHTML=`${abaConf.emoji} <span>${abaConf.label}</span>`;
+  else document.getElementById('hdr-title').innerHTML=HDR[p]||p;
   closeSidebar();
   if(p==='cartao')renderCartao();
-  else if(p==='duanni')renderDuanni();
-  else if(p==='alan')renderAlan();
-  else if(p==='ronaldo')renderRonaldo();
-  else if(p==='apto')renderApto();
+  else renderPage(p);
 }
 
 // ══ SUPABASE ══
@@ -837,7 +1251,7 @@ async function loadData(){
   if(bkFast)try{
     const p=JSON.parse(bkFast);
     DB={...DB,...p};
-    rebuildAllSelects();renderAll(); // render rápido com dados locais
+    rebuildAllSelects();injectPersonaCSS();buildSummaryGrid();buildPayersGrid();buildSidebarPersonal();buildDynamicPages();renderAll(); // render rápido com dados locais
   }catch(e2){}
   syncBar('syncing','☁️ atualizando...');
   try{
@@ -849,10 +1263,12 @@ async function loadData(){
       DB.cartao=Array.isArray(d.cartao)?d.cartao:[];
       DB.pessoal=Array.isArray(d.pessoal)?d.pessoal:[];
       DB.apto=d.apto||{};
-      DB.claro=d.claro||0;
-      DB.claroLabel=d.claroLabel||null;
       DB.divisao=d.divisao||{duanni:50,alan:50};
       DB.devoIds=Array.isArray(d.devoIds)?d.devoIds:(d.devo?[]:[]);
+      if(d.devoConfig)DB.devoConfig={...DB.devoConfig,...d.devoConfig};
+      if(Array.isArray(d.pessoas)&&d.pessoas.length)DB.pessoas=d.pessoas;
+      if(Array.isArray(d.abas)&&d.abas.length)DB.abas=d.abas;
+      if(d.customCards&&typeof d.customCards==='object')DB.customCards=d.customCards;
       DB.desc_garagem=d.desc_garagem||null;
       DB.desc_fundo=d.desc_fundo||null;
       DB.descontos=Array.isArray(d.descontos)?d.descontos:null;
@@ -863,7 +1279,10 @@ async function loadData(){
     syncBar('error','⚠️ offline — dados locais. Toque para tentar.');
     return; // já carregou do cache acima
   }
-  rebuildAllSelects();preencherAptoFuturo();renderAll();
+  rebuildAllSelects();preencherAptoFuturo();
+  injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
+  buildSidebarPersonal();buildDynamicPages();
+  renderAll();
 }
 async function saveData(){
   localStorage.setItem('cc_bk',JSON.stringify(DB));
@@ -1015,11 +1434,14 @@ function rebuildAllSelects(){
   let ch='';
   for(let y=mnY;y<=mxY;y++){const s=y===mnY?mnM:1,e=y===mxY?mxM:12;for(let m=s;m<=e;m++){const v=`${y}-${String(m).padStart(2,'0')}`;ch+=`<option value="${v}">${MN[m-1]} ${y}</option>`;}}
   if(!ch)ch=`<option value="${TODAY}">${MN[NOW.getMonth()]} ${NOW.getFullYear()}</option>`;
-  // Apply full selects (modais de cadastro apenas)
-  ['cm-mes-compra','cm-rec-inicio'].forEach(id=>{
-    const el=document.getElementById(id);if(!el)return;
-    const prev=el.value||TODAY;el.innerHTML=fh;el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
-  });
+  // cm-mes-compra: 1 mês atrás + hoje + 3 à frente
+  const cmMonths=[-1,0,1,2,3].map(n=>shiftM(TODAY,n));
+  let cmh='';cmMonths.forEach(v=>{const[y,m]=v.split('-').map(Number);cmh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
+  const cmMC=document.getElementById('cm-mes-compra');
+  if(cmMC){const prev=cmMC.value||TODAY;cmMC.innerHTML=cmh;cmMC.value=cmMC.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  // cm-rec-inicio: range completo
+  const cmRI=document.getElementById('cm-rec-inicio');
+  if(cmRI){const prev=cmRI.value||TODAY;cmRI.innerHTML=fh;cmRI.value=cmRI.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   document.getElementById('cm-rec-fim').innerHTML=ff;
   // Smart months for Apartamento
   const ams=getAptoMonths();
@@ -1131,7 +1553,7 @@ function getPersonCartaoTotal(person,month){
 
 // ══ RENDER CARTÃO ══
 function onCartaoMonthChange(){document.getElementById('c-btn-today').classList.toggle('visible',document.getElementById('c-month-sel').value!==TODAY);renderCartao();}
-function renderCartao(){
+function renderCartao(){const PC=getPC();
   const month=document.getElementById('c-month-sel').value;
   document.getElementById('c-fat-month').textContent=getML(month);
   const allActive=(DB.cartao||[]).filter(e=>getInfo(e,month)!==null);
@@ -1164,18 +1586,21 @@ function renderCartao(){
     </tr>`;
   }).join('');
 }
-function setFilter(p){
+function setFilter(p){const PC=getPC();
   personFilter=personFilter===p?null:p;
   document.getElementById('person-view-bar').classList.toggle('visible',!!personFilter);
   if(personFilter){document.getElementById('pv-emoji').textContent=PC[p].emoji;document.getElementById('pv-label').textContent='despesas de '+PC[p].label;}
   Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.toggle('active-filter',k===personFilter));
   renderCartao();
 }
-function clearFilter(){personFilter=null;document.getElementById('person-view-bar').classList.remove('visible');Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.remove('active-filter'));renderCartao();}
+function clearFilter(){const PC=getPC();personFilter=null;document.getElementById('person-view-bar').classList.remove('visible');Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.remove('active-filter'));renderCartao();}
 
 // ══ RENDER DUANNI ══
 function renderDuanni(){
   const month=document.getElementById('d-month-sel').value;
+  const _pd=getPessoaById('duanni');
+  const _lbl=document.getElementById('d-banner-label');
+  if(_lbl)_lbl.textContent=`${_pd.emoji} total de ${_pd.label} no mês`;
   document.getElementById('d-btn-today').classList.toggle('visible',month!==TODAY);
   document.getElementById('d-month-lbl').textContent=getML(month);
   const cartaoVal=getPersonCartaoTotal('duanni',month);
@@ -1193,7 +1618,8 @@ function renderDuanni(){
   document.getElementById('d-cartao-val').innerHTML=fmt(cartaoVal);
   document.getElementById('d-apto-val').innerHTML=fmt(aptoVal);
   document.getElementById('d-pessoal-val').innerHTML=fmt(pessoalVal);
-  document.getElementById('d-total').innerHTML=fmt(cartaoVal+aptoVal+pessoalVal);
+  const dCustomTotal=renderCustomCards('duanni',cartaoVal+aptoVal+pessoalVal);
+  document.getElementById('d-total').innerHTML=fmt(dCustomTotal);
   const tbody=document.getElementById('pessoal-table');
   document.getElementById('pessoal-empty').style.display=pessoal.length?'none':'block';
   tbody.innerHTML=pessoal.map(e=>{
@@ -1229,6 +1655,9 @@ function renderDuanni(){
 // ══ RENDER ALAN ══
 function renderAlan(){
   const month=document.getElementById('al-month-sel').value;
+  const _pal=getPessoaById('alan');
+  const _lal=document.getElementById('al-banner-label');
+  if(_lal)_lal.textContent=`${_pal.emoji} total de ${_pal.label} no mês`;
   document.getElementById('al-btn-today').classList.toggle('visible',month!==TODAY);
   document.getElementById('al-month-lbl').textContent=getML(month);
   const cartaoVal=getPersonCartaoTotal('alan',month);
@@ -1266,24 +1695,24 @@ function renderAlan(){
       :'<div style="padding:12px 0;font-size:0.8rem;color:var(--dusty);font-style:italic;">nenhuma despesa associada ainda</div>';
   }
   // total = cartão + apto − devo
-  document.getElementById('al-total').innerHTML=fmt(cartaoVal+aptoVal-devoVal);
+  const alCustomTotal=renderCustomCards('alan',cartaoVal+aptoVal-devoVal);
+  document.getElementById('al-total').innerHTML=fmt(alCustomTotal);
+  renderAlanDevoCard();
 }
 
 // ══ RENDER RONALDO ══
 function renderRonaldo(){
   const month=document.getElementById('ro-month-sel').value;
+  const _pro=getPessoaById('ronaldo');
+  const _lro=document.getElementById('ro-banner-label');
+  if(_lro)_lro.textContent=`${_pro.emoji} total de ${_pro.label} no mês`;
   document.getElementById('ro-btn-today').classList.toggle('visible',month!==TODAY);
   document.getElementById('ro-month-lbl').textContent=getML(month);
-  const claroVal=DB.claro||0;
-  const claroLabel=DB.claroLabel||'Internet Claro';
-  document.getElementById('ro-claro-val').innerHTML=fmt(claroVal);
-  document.getElementById('ro-claro-nome').textContent='🌐 '+claroLabel;
-  document.getElementById('claro-nome-input').value=claroLabel;
-  if(DB.claro)document.getElementById('claro-input').value=DB.claro;
+
   const active=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.payers||[]).includes('ronaldo'));
   const foot=document.getElementById('ro-cartao-foot');
   document.getElementById('ro-cartao-empty').style.display=active.length?'none':'block';
-  if(!active.length){document.getElementById('ro-cartao-table').innerHTML='';foot.style.display='none';document.getElementById('ro-total').innerHTML=fmt(claroVal);return;}
+  if(!active.length){document.getElementById('ro-cartao-table').innerHTML='';foot.style.display='none';document.getElementById('ro-total').innerHTML=fmt(0);return;}
   let tot=0;
   document.getElementById('ro-cartao-table').innerHTML=active.map(e=>{
     const p=getInfo(e,month);
@@ -1300,7 +1729,9 @@ function renderRonaldo(){
   }).join('');
   foot.style.display='flex';
   document.getElementById('ro-cartao-total').innerHTML=fmt(tot);
-  document.getElementById('ro-total').innerHTML=fmt(tot+claroVal);
+  const roBase=tot;
+  const roCustomTotal=renderCustomCards('ronaldo',roBase);
+  document.getElementById('ro-total').innerHTML=fmt(roCustomTotal);
 }
 
 // ══ APÊ RENAME ══
@@ -1489,7 +1920,7 @@ function saveAluguelInline(){
   const modo=document.getElementById('ae-aluguel-modo')?.value||'sub';
   if(!DB.apto[month])DB.apto[month]={};
   DB.apto[month].aluguel={...(DB.apto[month].aluguel||{}),valor,desconto,modo};
-  preencherAptoFuturo(true);saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
+  preencherAptoFuturo(true);saveData();renderPage('apto');renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
 }
 function saveExtraCard(key){
   const month=document.getElementById('a-month-sel').value;
@@ -1498,7 +1929,7 @@ function saveExtraCard(key){
   const modo=document.getElementById('ae-extra-modo-'+key)?.value||'add';
   if(!DB.apto[month].extras)DB.apto[month].extras={};
   DB.apto[month].extras[key]={...DB.apto[month].extras[key],valor,modo};
-  preencherAptoFuturo(true);saveData();renderApto();renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
+  preencherAptoFuturo(true);saveData();renderPage('apto');renderDuanni();renderAlan();toast('✅ salvo! Meses futuros atualizados.');
 }
 function delAptoCard(tipo){
   if(!confirm('Remover este item?'))return;
@@ -1631,10 +2062,9 @@ function saveDescModal(){
   const incompletos=_descItems.filter(d=>!d.nome||!(d.valor>0));
   if(incompletos.length>0){toast('⚠️ preencha nome e valor de todos os descontos!');return;}
   DB.descontos=_descItems.map(d=>({...d}));
-  preencherAptoFuturo(true);closeDescModal();saveData();renderApto();renderDuanni();renderAlan();toast('✅ descontos salvos! Meses futuros atualizados.');
+  preencherAptoFuturo(true);closeDescModal();saveData();renderPage('apto');renderDuanni();renderAlan();toast('✅ descontos salvos! Meses futuros atualizados.');
 }
 
-// ══ CLARO ══
 // Retorna valor que devo ao Alan no mês (soma parcelas das despesas associadas)
 function getDevoValMes(month){
   return(DB.devoIds||[]).reduce((s,id)=>{
@@ -1646,6 +2076,101 @@ function getDevoValMes(month){
     const parc=e.parcelas||1;
     return(diff>=0&&diff<parc)?s+(e.total/parc):s;
   },0);
+}
+// ══ MODAL ABAS ══
+let _abasEdit=[];
+function openAbasModal(){
+  _abasEdit=JSON.parse(JSON.stringify(getAbas()));
+  renderAbasLista();
+  document.getElementById('ov-abas').classList.add('active');
+}
+function closeAbasModal(){document.getElementById('ov-abas').classList.remove('active');}
+function renderAbasLista(){
+  const lista=document.getElementById('abas-lista');
+  if(!lista)return;
+  const TIPOS=[
+    {v:'pessoal',l:'🌸 Pessoal (cartão + apto + despesas)'},
+    {v:'cartao_resumo',l:'💳 Resumo cartão + itens extra'},
+    {v:'cartao_proprio',l:'🏔️ Resumo cartão (sem pessoal)'},
+    {v:'apto_share',l:'🏠 Compartilha apartamento'},
+  ];
+  const BANNERS=BANNER_CLASSES.map(b=>`<option value="${b}">${b}</option>`).join('');
+  // Separar abas fixas (não editáveis) das customizadas
+  lista.innerHTML=_abasEdit.map((a,i)=>{
+    const fixa=['duanni','alan','ronaldo','apto'].includes(a.id);
+    if(fixa){
+      return`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--cream);border-radius:12px;border:1.5px solid var(--blush);opacity:0.7;">
+        <span style="font-size:1.1rem;">${a.emoji}</span>
+        <span style="flex:1;font-size:0.87rem;font-weight:500;color:var(--mocha);">${a.label}</span>
+        <span style="font-size:0.72rem;color:var(--dusty);">aba fixa</span>
+      </div>`;
+    }
+    return`<div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1.5px solid var(--blush);">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input type="text" value="${a.emoji}" maxlength="2"
+          style="width:38px;text-align:center;font-size:1.2rem;border:1.5px solid var(--blush);border-radius:8px;padding:4px;background:var(--white);outline:none;"
+          oninput="_abasEdit[${i}].emoji=this.value">
+        <input type="text" value="${a.label}" placeholder="nome da aba"
+          style="flex:1;font-family:'DM Sans',sans-serif;font-size:0.87rem;border:1.5px solid var(--blush);border-radius:8px;padding:6px 10px;background:var(--white);outline:none;color:var(--dark);"
+          oninput="_abasEdit[${i}].label=this.value">
+        <button onclick="delAba(${i})" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:1rem;padding:4px;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:0.63rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--dusty);margin-bottom:3px;">tipo de aba</div>
+          <select style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.82rem;border:1.5px solid var(--blush);border-radius:8px;padding:6px 8px;background:var(--white);outline:none;cursor:pointer;"
+            onchange="_abasEdit[${i}].blocos=this.value==='pessoal'?['cartao','apto','pessoal']:this.value==='cartao_resumo'?['cartao','custom_cards']:this.value==='cartao_proprio'?['cartao_proprio']:['apto_share'];">
+            ${TIPOS.map(t=>`<option value="${t.v}"${(a.blocos||[]).join(',')===(['cartao','apto','pessoal']).join(',')&&t.v==='pessoal'?' selected':''||((a.blocos||[]).includes('custom_cards')&&!a.blocos.includes('pessoal')&&t.v==='cartao_resumo')?' selected':''||((a.blocos||[]).includes('cartao_proprio')&&t.v==='cartao_proprio')?' selected':''||((a.blocos||[]).includes('apto_share')&&t.v==='apto_share')?' selected':''} >${t.l}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div style="font-size:0.63rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--dusty);margin-bottom:3px;">cor do banner</div>
+          <select style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.82rem;border:1.5px solid var(--blush);border-radius:8px;padding:6px 8px;background:var(--white);outline:none;cursor:pointer;"
+            onchange="_abasEdit[${i}].bannerClass=this.value">
+            ${BANNER_CLASSES.map(b=>`<option value="${b}"${a.bannerClass===b?' selected':''}>${b}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function delAba(i){
+  if(['duanni','alan','ronaldo','apto'].includes(_abasEdit[i].id)){toast('⚠️ abas fixas não podem ser removidas');return;}
+  _abasEdit.splice(i,1);renderAbasLista();
+}
+function addAba(){
+  _abasEdit.push({id:'aba_'+Date.now(),emoji:'⭐',label:'Nova aba',bannerClass:'mocha',blocos:['pessoal']});
+  renderAbasLista();
+}
+function saveAbas(){
+  if(_abasEdit.some(a=>!a.label.trim())){toast('⚠️ todas as abas precisam ter nome!');return;}
+  DB.abas=_abasEdit;
+  buildSidebarPersonal();buildDynamicPages();
+  saveData();closeAbasModal();toast('✅ abas salvas!');
+}
+
+function openDevoRenameModal(){
+  const cfg=DB.devoConfig||{};
+  document.getElementById('devo-rename-titulo').value=cfg.titulo||'💕 cartão do meu amor';
+  document.getElementById('devo-rename-legenda').value=cfg.legenda||'despesas minhas no cartão dele · subtraído do total';
+  document.getElementById('ov-devo-rename').classList.add('active');
+}
+function closeDevoRenameModal(){document.getElementById('ov-devo-rename').classList.remove('active');}
+function saveDevoRename(){
+  const titulo=document.getElementById('devo-rename-titulo').value.trim()||'💕 cartão do meu amor';
+  const legenda=document.getElementById('devo-rename-legenda').value.trim();
+  if(!DB.devoConfig)DB.devoConfig={};
+  DB.devoConfig.titulo=titulo;DB.devoConfig.legenda=legenda;
+  saveData();renderAlanDevoCard();closeDevoRenameModal();toast('✅ card renomeado!');
+}
+function renderAlanDevoCard(){
+  const cfg=DB.devoConfig||{};
+  const t=document.getElementById('al-devo-titulo');
+  const l=document.getElementById('al-devo-legenda');
+  const mt=document.getElementById('devo-modal-titulo');
+  if(t)t.textContent=cfg.titulo||'💕 cartão do meu amor';
+  if(l)l.textContent=cfg.legenda||'despesas minhas no cartão dele · subtraído do total';
+  if(mt)mt.textContent=cfg.titulo||'💕 cartão do meu amor';
 }
 function openDevoModal(){
   renderDevoModalLista();
@@ -1700,16 +2225,10 @@ function toggleDevoId(id){
 function saveDevoModal(){
   saveData();closeDevoModal();renderAlan();toast('💕 atualizado!');
 }
-function saveClaro(){
-  const v=parseFloat(document.getElementById('claro-input').value);
-  if(isNaN(v)||v<0){toast('⚠️ informe o valor!');return;}
-  const nome=document.getElementById('claro-nome-input').value.trim();
-  if(nome)DB.claroLabel=nome;
-  DB.claro=v;saveData();toggleInlineEdit('claro-edit-panel');renderRonaldo();toast('✅ salvo!');
-}
+
 
 // ══ CARTÃO MODAL ══
-function openCartaoModal(id=null){
+function openCartaoModal(id=null){const PC=getPC();
   cmEditId=id;document.getElementById('cm-title').textContent=id?'✏️ editar despesa':'✨ nova despesa';
   if(id){
     const e=(DB.cartao||[]).find(x=>x.id===id);if(!e)return;
@@ -1800,7 +2319,7 @@ function updateCMRemainder(){
   else{el.textContent=`⚠️ passou R$ ${Math.abs(rem).toFixed(2).replace('.',',')}`;el.style.color='#9b5c5c';}
 }
 document.querySelectorAll('#ov-cartao .payer-option input').forEach(c=>c.addEventListener('change',()=>{if(cmSplitMode==='custom')buildCMCustom();}));
-function saveCartaoExpense(){
+function saveCartaoExpense(){const PC=getPC();
   const store=document.getElementById('cm-store').value.trim(),desc=document.getElementById('cm-desc').value.trim();
   const payers=[...document.querySelectorAll('#ov-cartao .payer-option input:checked')].map(i=>i.value);
   if(!store||!desc||!payers.length){toast('⚠️ preencha todos os campos!');return;}
