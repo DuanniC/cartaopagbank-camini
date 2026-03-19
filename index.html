@@ -1783,6 +1783,7 @@ function showPage(p){
 // ══ SUPABASE ══
 // ── Popula DB com dados do Supabase/cache ──
 function _applyData(d){
+  if(!d||typeof d!=='object')return;
   DB.cartao  =Array.isArray(d.cartao) ?d.cartao.filter(e=>e&&e.id&&e.mesInicio):[];
   DB.pessoal =Array.isArray(d.pessoal)?d.pessoal:[];
   DB.apto    =d.apto   ||{};
@@ -1795,55 +1796,105 @@ function _applyData(d){
   if(d.customCards&&typeof d.customCards==='object')DB.customCards=d.customCards;
   if(d.customData &&typeof d.customData ==='object')DB.customData=d.customData;
   if(d.pagesHidden&&typeof d.pagesHidden==='object')DB.pagesHidden=d.pagesHidden;
-  DB.descontos   =Array.isArray(d.descontos)?d.descontos:null;
+  if(Array.isArray(d.descontos))DB.descontos=d.descontos;
+  else if(d.descontos===null)DB.descontos=null;
+}
+
+// Retorna apenas os campos que devem ser persistidos no Supabase
+function _serializeDB(){
+  return{
+    cartao:DB.cartao||[],
+    pessoal:DB.pessoal||[],
+    apto:DB.apto||{},
+    divisao:DB.divisao||{duanni:50,alan:50},
+    devoIds:DB.devoIds||[],
+    devoConfig:DB.devoConfig||{},
+    pessoas:DB.pessoas||null,
+    bancos:DB.bancos||null,
+    abas:DB.abas||null,
+    customCards:DB.customCards||{},
+    customData:DB.customData||{},
+    pagesHidden:DB.pagesHidden||{},
+    descontos:DB.descontos||null
+  };
 }
 
 async function loadData(){
   // 1. Cache local — render imediato sem esperar Supabase
   const bk=localStorage.getItem('cc_bk');
-  if(bk){try{_applyData(JSON.parse(bk));}catch(e){}}
+  if(bk){try{_applyData(JSON.parse(bk));}catch(e){console.warn('cache inválido',e);}}
   rebuildAllSelects();
   injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
   buildSidebarPersonal();buildDynamicPages();buildPmBancoSelect();
   renderAll();
-  // 2. Supabase — atualizar em background
-  syncBar('syncing','☁️ atualizando...');
+  // 2. Buscar dados frescos do Supabase
+  syncBar('syncing','☁️ sincronizando...');
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=data`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{
+        'apikey':SUPA_KEY,
+        'Authorization':'Bearer '+SUPA_KEY,
+        'Cache-Control':'no-cache'
+      }
     });
     if(!r.ok)throw new Error('HTTP '+r.status);
     const rows=await r.json();
-    if(rows.length&&rows[0].data)_applyData(rows[0].data);
-    try{localStorage.setItem('cc_bk',JSON.stringify(DB));}catch(e){
-    // localStorage cheio — limpar e tentar de novo
-    try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(DB));}catch(e2){}
-  }
+    if(!Array.isArray(rows)||rows.length===0)throw new Error('Nenhum dado no Supabase');
+    if(rows[0].data){
+      _applyData(rows[0].data);
+      // Atualizar cache
+      try{localStorage.setItem('cc_bk',JSON.stringify(rows[0].data));}catch(e){
+        try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(rows[0].data));}catch(e2){}
+      }
+      console.log('[loadData] dados do Supabase aplicados, cartao:',DB.cartao.length,'pessoal:',DB.pessoal.length);
+    }
     syncBar('ok','✅ sincronizado!');
   }catch(e){
-    syncBar('error','⚠️ offline — clique para tentar');
-    return;
+    console.error('loadData error:',e);
+    syncBar('error','⚠️ sem conexão — usando cache local. Clique para tentar novamente.');
+    // Não retornar — continuar com o cache que já foi aplicado
   }
-  // 3. Re-render com dados frescos
+  // 3. Re-render com dados frescos (ou cache)
   rebuildAllSelects();
   preencherAptoFuturo();
-  injectPersonaCSS();buildSummaryGrid();
+  injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
+  buildSidebarPersonal();buildDynamicPages();
   renderAll();
 }
 async function saveData(){
-  try{localStorage.setItem('cc_bk',JSON.stringify(DB));}catch(e){
-    // localStorage cheio — limpar e tentar de novo
-    try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(DB));}catch(e2){}
+  // Salvar localStorage imediatamente
+  const _sd=_serializeDB();
+  try{localStorage.setItem('cc_bk',JSON.stringify(_sd));}catch(e){
+    try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(_sd));}catch(e2){}
   }
   syncBar('syncing','☁️ salvando...');
+  // Debounce de 400ms para evitar múltiplos saves seguidos
   if(saveTimer)clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{
     try{
-      const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({data:DB})});
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      syncBar('ok','✅ salvo!');
-    }catch(e){syncBar('error','⚠️ erro ao salvar: '+e.message);}
-  },600);
+      const payload=JSON.stringify({data:_serializeDB()});
+      const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1`,{
+        method:'PATCH',
+        headers:{
+          'apikey':SUPA_KEY,
+          'Authorization':'Bearer '+SUPA_KEY,
+          'Content-Type':'application/json',
+          'Prefer':'return=minimal'
+        },
+        body:payload
+      });
+      if(!r.ok){
+        const txt=await r.text().catch(()=>'');
+        throw new Error('HTTP '+r.status+(txt?' — '+txt.slice(0,120):''));
+      }
+      // Atualizar cache com dado confirmado
+      try{localStorage.setItem('cc_bk',JSON.stringify(_serializeDB()));}catch(e){}
+      syncBar('ok','✅ salvo na nuvem!');
+    }catch(e){
+      console.error('saveData error:',e);
+      syncBar('error','⚠️ erro ao salvar — clique para tentar: '+e.message);
+    }
+  },400);
 }
 
 // ══ SELECTS ══
