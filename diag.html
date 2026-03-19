@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 Diagnóstico Financeiro</title>
+<style>
+body{font-family:monospace;padding:20px;background:#1a1a2e;color:#eee;font-size:14px;}
+h1{color:#e2a0ff;margin-bottom:20px;}
+.section{background:#16213e;border-radius:10px;padding:16px;margin-bottom:16px;border-left:4px solid #e2a0ff;}
+.ok{color:#4ecca3;} .err{color:#ff6b6b;} .warn{color:#ffd93d;}
+pre{white-space:pre-wrap;word-break:break-all;font-size:12px;margin:8px 0;}
+button{background:#7b5ea7;color:white;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px;margin:4px;}
+.big{font-size:1.2em;font-weight:bold;}
+</style>
+</head>
+<body>
+<h1>🔍 Diagnóstico — Financeiro</h1>
+<div id="out"></div>
+<button onclick="runDiag()">▶ Rodar diagnóstico completo</button>
+<button onclick="testWrite()">✍️ Testar escrita no Supabase</button>
+<button onclick="clearLocal()">🗑️ Limpar cache local</button>
+
+<script>
+const SUPA_URL='https://vetitsfohmajtizyepub.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZldGl0c2ZvaG1hanRpenllcHViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNTQxMTMsImV4cCI6MjA4ODgzMDExM30.Qb5pMhoj9OPq6vevkA8CqN4McwoylrKSBQzDelPFjwQ';
+
+function log(html){document.getElementById('out').innerHTML+=html+'<br>';}
+function section(title){log(`<div class="section"><span class="big">${title}</span>`);}
+function endSection(){log('</div>');}
+
+async function runDiag(){
+  document.getElementById('out').innerHTML='';
+  
+  // 1. Cache local
+  section('1️⃣ Cache Local (localStorage)');
+  try{
+    const bk=localStorage.getItem('cc_bk');
+    if(!bk){log('<span class="warn">⚠️ Nenhum cache local encontrado</span>');}
+    else{
+      const d=JSON.parse(bk);
+      log(`<span class="ok">✅ Cache encontrado</span>`);
+      log(`cartao: <b>${(d.cartao||[]).length}</b> itens`);
+      log(`pessoal: <b>${(d.pessoal||[]).length}</b> itens`);
+      log(`customData: <b>${JSON.stringify(Object.keys(d.customData||{}))}</b>`);
+      log(`Tamanho: <b>${(JSON.stringify(bk).length/1024).toFixed(1)} KB</b>`);
+    }
+  }catch(e){log(`<span class="err">❌ Erro no cache: ${e.message}</span>`);}
+  endSection();
+
+  // 2. Leitura Supabase
+  section('2️⃣ Leitura do Supabase');
+  try{
+    const t0=Date.now();
+    const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=id,data`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Cache-Control':'no-cache'}
+    });
+    const ms=Date.now()-t0;
+    log(`HTTP: <b>${r.status} ${r.statusText}</b> (${ms}ms)`);
+    if(!r.ok){
+      const txt=await r.text();
+      log(`<span class="err">❌ Erro: ${txt}</span>`);
+    } else {
+      const rows=await r.json();
+      log(`<span class="ok">✅ Leitura OK</span>`);
+      log(`Rows retornados: <b>${rows.length}</b>`);
+      if(rows.length===0){
+        log(`<span class="err">❌ PROBLEMA: id=1 não existe no banco!</span>`);
+      } else {
+        const d=rows[0].data||{};
+        log(`cartao: <b>${(d.cartao||[]).length}</b> itens`);
+        log(`pessoal: <b>${(d.pessoal||[]).length}</b> itens`);
+        log(`customData: <b>${JSON.stringify(Object.keys(d.customData||{}))}</b>`);
+        const sz=JSON.stringify(d).length;
+        log(`Tamanho dado: <b>${(sz/1024).toFixed(1)} KB</b>`);
+        if(sz>500000) log(`<span class="warn">⚠️ Dado muito grande! Pode causar problemas.</span>`);
+      }
+    }
+  }catch(e){
+    log(`<span class="err">❌ ERRO DE REDE: ${e.message}</span>`);
+    log(`<span class="warn">Possível causa: CSP, CORS ou sem internet</span>`);
+  }
+  endSection();
+
+  // 3. Headers de resposta
+  section('3️⃣ CORS / Headers');
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=id`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const headers=['content-type','access-control-allow-origin','x-ratelimit-remaining'];
+    headers.forEach(h=>{
+      const v=r.headers.get(h);
+      if(v) log(`${h}: <b>${v}</b>`);
+    });
+    log(`<span class="ok">✅ CORS OK</span>`);
+  }catch(e){log(`<span class="err">❌ ${e.message}</span>`);}
+  endSection();
+
+  // 4. Teste escrita pequena
+  section('4️⃣ Teste de Escrita (campo de teste)');
+  await testWrite();
+  endSection();
+}
+
+async function testWrite(){
+  try{
+    // Ler primeiro
+    const r0=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=data`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Cache-Control':'no-cache'}
+    });
+    if(!r0.ok) throw new Error('Leitura falhou: '+r0.status);
+    const rows=await r0.json();
+    if(!rows.length) throw new Error('id=1 não existe!');
+    
+    const dadoAtual=rows[0].data||{};
+    dadoAtual._diag_test=new Date().toISOString();
+    
+    const t0=Date.now();
+    const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1`,{
+      method:'PATCH',
+      headers:{
+        'apikey':SUPA_KEY,
+        'Authorization':'Bearer '+SUPA_KEY,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify({data:dadoAtual})
+    });
+    const ms=Date.now()-t0;
+    const txt=await r.text().catch(()=>'');
+    log(`HTTP PATCH: <b>${r.status}</b> (${ms}ms) ${txt?'— '+txt.slice(0,200):''}`);
+    if(r.ok){
+      log(`<span class="ok">✅ ESCRITA OK — dado gravado no Supabase!</span>`);
+      log(`Campo _diag_test: <b>${dadoAtual._diag_test}</b>`);
+    } else {
+      log(`<span class="err">❌ ESCRITA FALHOU: ${r.status}</span>`);
+      if(r.status===403) log(`<span class="err">403 = Permissão negada. RLS (Row Level Security) bloqueando!</span>`);
+      if(r.status===404) log(`<span class="err">404 = Row id=1 não encontrada!</span>`);
+      if(r.status===413) log(`<span class="err">413 = Payload muito grande!</span>`);
+    }
+  }catch(e){
+    log(`<span class="err">❌ Erro: ${e.message}</span>`);
+  }
+}
+
+function clearLocal(){
+  localStorage.removeItem('cc_bk');
+  log('<span class="ok">✅ Cache local limpo! Recarregue o Financeiro.</span>');
+}
+
+// Rodar automático
+runDiag();
+</script>
+</body>
+</html>
