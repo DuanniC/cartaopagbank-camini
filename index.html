@@ -2265,7 +2265,7 @@ function setCMSplit(mode){
 function getCMParcVal(){if(cmExpType==='rec')return parseFloat(document.getElementById('cm-mensal').value)||0;const t=parseFloat(document.getElementById('cm-total').value)||0,p=parseInt(document.getElementById('cm-parcelas').value)||1;return t/p;}
 function calcParcInfo(mesInicio, parcelas, today){
   // Retorna string resumida: "X/Y · termina Mês Ano" ou "" se inválido
-  if(!mesInicio||!parcelas||parcelas<=1)return '';
+  if(!mesInicio||!parcelas||parcelas<=12)return '';
   const[iy,im]=mesInicio.split('-').map(Number);
   const[ty,tm]=today.split('-').map(Number);
   const diff=(ty-iy)*12+(tm-im);
