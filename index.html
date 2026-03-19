@@ -531,7 +531,15 @@ input[type=month]::-webkit-date-and-time-value{
   <main>
     <button onclick="voltarParaDuanni()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--mocha);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;padding:8px 0 4px;font-weight:500;">← voltar para Duanni</button>
     <div class="banner" style="flex-direction:column;align-items:flex-start;gap:8px;background:linear-gradient(135deg,#D183A9,#e8a8c4,#F3C8DD);box-shadow:0 5px 20px rgba(209,131,169,0.35);">
-      <div class="b-label">📱 meta — celular novo</div>
+      <div class="b-label" id="mc-titulo-display" onclick="mcStartRename()" title="clique para editar" style="cursor:pointer;display:flex;align-items:center;gap:6px;">📱 meta — celular novo <span style="font-size:0.7rem;opacity:0.7;">✎</span></div>
+      <div id="mc-titulo-edit" style="display:none;display:none;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="mc-emoji-inp" type="text" maxlength="2" style="width:36px;text-align:center;font-size:1.1rem;background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.5);border-radius:8px;padding:4px;color:white;outline:none;">
+          <input id="mc-nome-inp" type="text" style="flex:1;font-family:'DM Sans',sans-serif;font-size:0.82rem;background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.5);border-radius:8px;padding:5px 10px;color:white;outline:none;" placeholder="nome da meta">
+          <button onclick="mcSaveRename()" style="background:rgba(255,255,255,0.3);color:white;border:none;border-radius:8px;padding:5px 10px;font-size:0.8rem;cursor:pointer;">✓</button>
+          <button onclick="mcCancelRename()" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:5px 8px;font-size:0.8rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
       <div class="b-total" id="mc-barra-val">R$ 0,00 de R$ 0,00</div>
       <div style="width:100%;background:rgba(255,255,255,0.25);border-radius:8px;height:10px;margin-top:2px;">
         <div id="mc-barra" style="height:10px;border-radius:8px;background:white;width:0%;transition:width 0.7s ease;"></div>
@@ -636,7 +644,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div id="dynamic-pages-container"></div>
 
 <!-- MODAL ABAS -->
-<div class="overlay" id="ov-abas" onclick="if(event.target===this)closeAbasModal()">
+<div class="overlay" id="ov-abas">
   <div class="modal" style="max-width:460px;">
     <h3>📑 gerenciar abas</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Crie, edite ou remova abas pessoais. As abas aparecem no menu lateral.</p>
@@ -650,7 +658,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL BANCOS -->
-<div class="overlay" id="ov-bancos" onclick="if(event.target===this)closeBancosModal()" style="z-index:700;">
+<div class="overlay" id="ov-bancos" style="z-index:700;">
   <div class="modal" style="max-width:400px;">
     <h3>🏦 bancos & contas</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Gerencie os bancos disponíveis nas despesas pessoais.</p>
@@ -664,7 +672,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL PESSOAS -->
-<div class="overlay" id="ov-pessoas" onclick="if(event.target===this)closePessoasModal()">
+<div class="overlay" id="ov-pessoas">
   <div class="modal" style="max-width:420px;">
     <h3>👥 pessoas & filtros</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Edite os nomes, emojis e cores. A cor define o visual do card e das tags.</p>
@@ -692,7 +700,7 @@ input[type=month]::-webkit-date-and-time-value{
 
 
 <!-- MODAL CARTÃO DO AMOR -->
-<div class="overlay" id="ov-devo" onclick="if(event.target===this)closeDevoModal()">
+<div class="overlay" id="ov-devo">
   <div class="modal" style="max-width:460px;">
     <h3 id="devo-modal-titulo">💕 cartão do meu amor</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:6px;">Selecione as despesas das suas pessoais que foram no cartão dele. As parcelas serão distribuídas automaticamente mês a mês.</p>
@@ -708,7 +716,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL CUSTOM CARD -->
-<div class="overlay" id="ov-custom-card" onclick="if(event.target===this)closeCustomCardModal()">
+<div class="overlay" id="ov-custom-card">
   <div class="modal" style="max-width:400px;">
     <h3>🃏 card personalizado</h3>
     <input type="hidden" id="cc-aba-id">
@@ -732,7 +740,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL RENAME DEVO CARD -->
-<div class="overlay" id="ov-devo-rename" onclick="if(event.target===this)closeDevoRenameModal()">
+<div class="overlay" id="ov-devo-rename">
   <div class="modal" style="max-width:400px;">
     <h3>✏️ renomear card</h3>
     <div class="form-row"><label>título</label><input id="devo-rename-titulo" type="text" placeholder="ex: 💕 cartão do meu amor"></div>
@@ -745,7 +753,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL DESCONTOS ALUGUEL -->
-<div class="overlay" id="ov-desc" onclick="if(event.target===this)closeDescModal()">
+<div class="overlay" id="ov-desc">
   <div class="modal" style="max-width:440px;">
     <h3>⚙️ descontos automáticos</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:14px;">Deduzidos automaticamente do valor bruto todo mês</p>
@@ -759,7 +767,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL DIVISÃO APÊ -->
-<div class="overlay" id="ov-divisao" onclick="if(event.target===this)closeDivisaoModal()">
+<div class="overlay" id="ov-divisao">
   <div class="modal" style="max-width:380px;">
     <h3>⚖️ divisão do apartamento</h3>
     <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:18px;">Como dividir o saldo entre Duanni e Alan?<br><small style="opacity:0.7;">(base: Caixa − Aluguel líquido + extras)</small></p>
@@ -777,7 +785,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL ADD APÊ CARD -->
-<div class="overlay" id="ov-add-apto" onclick="if(event.target===this)closeAddAptoCard()">
+<div class="overlay" id="ov-add-apto">
   <div class="modal" style="max-width:380px;">
     <h3>+ novo item do apartamento</h3>
     <div class="form-row"><label>📝 nome do item</label><input id="new-card-label" type="text" placeholder="ex: Água, Luz, Internet..."></div>
@@ -794,7 +802,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL CARTÃO -->
-<div class="overlay" id="ov-cartao" onclick="closeCartaoModal(event)">
+<div class="overlay" id="ov-cartao">
   <div class="modal">
     <h3 id="cm-title">✨ nova despesa</h3>
     <div class="form-row"><label>🔁 tipo</label>
@@ -845,7 +853,7 @@ input[type=month]::-webkit-date-and-time-value{
 </div>
 
 <!-- MODAL PESSOAL -->
-<div class="overlay" id="ov-pessoal" onclick="closePessoalModal(event)">
+<div class="overlay" id="ov-pessoal">
   <div class="modal">
     <h3 id="pm-title">🌸 nova despesa pessoal</h3>
     <div class="form-row"><label>📝 descrição</label><input id="pm-desc" type="text" placeholder="ex: Pipoqueira, Curso..."></div>
@@ -1386,6 +1394,14 @@ function mcFmtDate(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}
 
 function renderMetaCelular(){
   const d=(DB.customData||{})['meta-celular']||{};
+  // Atualizar título/emoji se salvos
+  const mcEmoji=d.emoji||'📱';const mcNome=d.nome||'meta — celular novo';
+  const disp=document.getElementById('mc-titulo-display');
+  if(disp)disp.innerHTML=`${mcEmoji} ${mcNome} <span style="font-size:0.7rem;opacity:0.7;">✎</span>`;
+  // Atualizar card de atalho na Duanni
+  const hdr=document.getElementById('hdr-title');
+  const pg=document.querySelector('.page.active');
+  if(pg&&pg.id==='page-meta-celular'&&hdr)hdr.innerHTML=`${mcEmoji} <span>${mcNome}</span>`;
   const meta=d.meta||0;
   const hist=d.hist||[];
   const guardado=hist.reduce((s,h)=>s+(h.valor||0),0);
@@ -1427,6 +1443,35 @@ function renderMetaCelular(){
       </div>
     </div>`;
   }).join('');
+}
+function mcStartRename(){
+  const d=(DB.customData||{})['meta-celular']||{};
+  const ei=document.getElementById('mc-emoji-inp');
+  const ni=document.getElementById('mc-nome-inp');
+  if(ei)ei.value=d.emoji||'📱';
+  if(ni)ni.value=d.nome||'meta — celular novo';
+  document.getElementById('mc-titulo-display').style.display='none';
+  const edit=document.getElementById('mc-titulo-edit');
+  edit.style.display='block';
+  setTimeout(()=>ni&&ni.focus(),50);
+}
+function mcSaveRename(){
+  const emoji=document.getElementById('mc-emoji-inp').value.trim()||'📱';
+  const nome=document.getElementById('mc-nome-inp').value.trim()||'meta — celular novo';
+  if(!DB.customData)DB.customData={};
+  if(!DB.customData['meta-celular'])DB.customData['meta-celular']={hist:[]};
+  DB.customData['meta-celular'].emoji=emoji;
+  DB.customData['meta-celular'].nome=nome;
+  document.getElementById('mc-titulo-edit').style.display='none';
+  document.getElementById('mc-titulo-display').style.display='flex';
+  saveData();renderMetaCelular();
+  // Atualizar card de atalho na Duanni
+  renderDuanniAtalhos();
+  toast('✅ nome atualizado!');
+}
+function mcCancelRename(){
+  document.getElementById('mc-titulo-edit').style.display='none';
+  document.getElementById('mc-titulo-display').style.display='flex';
 }
 function saveMetaCelular(){
   const meta=parseFloat(document.getElementById('mc-input-meta').value)||0;
@@ -1595,7 +1640,9 @@ function navFixedPage(id, titulo, renderFn){
   renderFn();
 }
 function criarAbaMetaCelular(){
-  navFixedPage('meta-celular','📱 <span>Meta — Celular</span>',renderMetaCelular);
+  const d=(DB.customData||{})['meta-celular']||{};
+  const e=d.emoji||'📱';const n=d.nome||'Meta — Celular';
+  navFixedPage('meta-celular',`${e} <span>${n}</span>`,renderMetaCelular);
 }
 function criarAbaRendimento(){
   navFixedPage('rendimento-pagseg','💰 <span>Rendimento PagSeguro</span>',renderRendimentoPagSeg);
@@ -2208,9 +2255,9 @@ function renderDuanniAtalhos(){
       </div>`:'<div style="font-size:0.73rem;color:var(--dusty);margin-top:6px;font-style:italic;">toque para definir a meta</div>';
     cards.push(`<div onclick="criarAbaMetaCelular()" style="background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);padding:16px 18px;cursor:pointer;transition:transform 0.18s,box-shadow 0.18s;border-left:4px solid #D183A9;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 22px var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 14px var(--shadow)'">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.6rem;">📱</span>
+        <span style="font-size:1.6rem;">${(DB.customData||{})['meta-celular']?.emoji||'📱'}</span>
         <div>
-          <div style="font-weight:600;font-size:0.87rem;color:var(--dark);">Meta — Celular novo</div>
+          <div style="font-weight:600;font-size:0.87rem;color:var(--dark);">${(DB.customData||{})["meta-celular"]?.nome||"Meta — Celular novo"}</div>
           <div style="font-size:0.74rem;color:var(--mocha);">meta: ${meta>0?fmtR(meta):'não definida'}</div>
         </div>
         <span style="margin-left:auto;font-size:0.78rem;color:#D183A9;font-weight:500;">→</span>
