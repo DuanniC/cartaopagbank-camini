@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://vetitsfohmajtizyepub.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data:;">
+<!-- CSP removida: estava bloqueando fetch ao Supabase -->
 <title>✨ Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -922,6 +922,9 @@ const CAIXA_TAXA=0.0017;
 // ══ STATE ══
 let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
 let saveTimer=null;
+let _dataReady=false;
+// Limpar qualquer cache local antigo
+try{localStorage.clear();}catch(e){} // proteção: não salvar antes dos dados do Supabase chegarem
 let cmSplitMode='equal',cmExpType='parc',cmEditId=null;
 let pmExpType='parc',pmEditId=null;
 let personFilter=null;
@@ -1163,31 +1166,31 @@ function buildDynamicPages(){
         <main>
           <div class="banner ${bc}" style="flex-direction:column;align-items:flex-start;gap:6px;">
             <div class="b-label">${aba.emoji} ${aba.label}</div>
-            <div class="b-total" id="${abaId}-meta-barra-val">—</div>
+            <div class="b-total" id="${aba.id}-meta-barra-val">—</div>
             <div style="width:100%;background:rgba(255,255,255,0.25);border-radius:8px;height:8px;margin-top:4px;">
-              <div id="${abaId}-meta-barra" style="height:8px;border-radius:8px;background:white;width:0%;transition:width 0.6s;"></div>
+              <div id="${aba.id}-meta-barra" style="height:8px;border-radius:8px;background:white;width:0%;transition:width 0.6s;"></div>
             </div>
-            <div class="b-sub" id="${abaId}-meta-pct">—</div>
+            <div class="b-sub" id="${aba.id}-meta-pct">—</div>
           </div>
           <div class="breakdown-grid cols2" style="margin-bottom:16px;">
-            <div class="bc"><div class="bc-icon">💰</div><div class="bc-label">Guardado</div><div class="bc-value" id="${abaId}-atual">—</div></div>
-            <div class="bc"><div class="bc-icon">🎯</div><div class="bc-label">Meta</div><div class="bc-value" id="${abaId}-meta">—</div></div>
+            <div class="bc"><div class="bc-icon">💰</div><div class="bc-label">Guardado</div><div class="bc-value" id="${aba.id}-atual">—</div></div>
+            <div class="bc"><div class="bc-icon">🎯</div><div class="bc-label">Meta</div><div class="bc-value" id="${aba.id}-meta">—</div></div>
           </div>
           <div class="table-section">
             <div class="table-header"><h2>✏️ atualizar valores</h2></div>
             <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-              <div class="form-row"><label>💰 valor atual guardado (R$)</label><input type="number" step="0.01" id="${abaId}-input-atual" class="form-row input" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
-              <div class="form-row"><label>🎯 meta total (R$)</label><input type="number" step="0.01" id="${abaId}-input-meta" class="form-row input" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
-              <button onclick="saveMetaPoupanca('${abaId}')" style="background:var(--dark);color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 salvar</button>
+              <div class="form-row"><label>💰 valor atual guardado (R$)</label><input type="number" step="0.01" id="${aba.id}-input-atual" class="form-row input" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+              <div class="form-row"><label>🎯 meta total (R$)</label><input type="number" step="0.01" id="${aba.id}-input-meta" class="form-row input" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+              <button onclick="saveMetaPoupanca('${aba.id}')" style="background:var(--dark);color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 salvar</button>
             </div>
           </div>
           <div style="text-align:center;margin-top:24px;padding-bottom:8px;">
-            <button onclick="delAbaCustom('${abaId}')" style="background:none;border:none;color:var(--rose);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑️ apagar esta página</button>
+            <button onclick="delAbaCustom('${aba.id}')" style="background:none;border:none;color:var(--rose);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑️ apagar esta página</button>
           </div>
         </main>`;
       container.appendChild(page);
       rebuildDynamicSelects();
-      renderMetaPoupanca(abaId);
+      renderMetaPoupanca(aba.id);
       return;
     }
     if(aba.tipo==='rendimento'){
@@ -1201,31 +1204,31 @@ function buildDynamicPages(){
         <main>
           <div class="banner ${bc}" style="flex-direction:column;align-items:flex-start;gap:4px;">
             <div class="b-label">${aba.emoji} ${aba.label}</div>
-            <div class="b-total" id="${abaId}-rend-saldo">—</div>
-            <div class="b-sub" id="${abaId}-rend-sub">—</div>
+            <div class="b-total" id="${aba.id}-rend-saldo">—</div>
+            <div class="b-sub" id="${aba.id}-rend-sub">—</div>
           </div>
           <div class="breakdown-grid cols2" style="margin-bottom:16px;">
-            <div class="bc"><div class="bc-icon">💵</div><div class="bc-label">Saldo atual</div><div class="bc-value" id="${abaId}-rend-atual">—</div></div>
-            <div class="bc"><div class="bc-icon">📈</div><div class="bc-label">Rendeu este período</div><div class="bc-value" id="${abaId}-rend-ganho" style="color:#4a8050;">—</div></div>
+            <div class="bc"><div class="bc-icon">💵</div><div class="bc-label">Saldo atual</div><div class="bc-value" id="${aba.id}-rend-atual">—</div></div>
+            <div class="bc"><div class="bc-icon">📈</div><div class="bc-label">Rendeu este período</div><div class="bc-value" id="${aba.id}-rend-ganho" style="color:#4a8050;">—</div></div>
           </div>
           <div class="table-section">
             <div class="table-header"><h2>✏️ lançar novo valor</h2></div>
             <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-              <div class="form-row"><label>💵 saldo atual (R$)</label><input type="number" step="0.01" id="${abaId}-input-saldo" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
-              <div class="form-row"><label>📝 descrição (ex: depósito de R$500)</label><input type="text" id="${abaId}-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: depósito mensal"></div>
-              <button onclick="saveRendimento('${abaId}')" style="background:var(--dark);color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 registrar</button>
+              <div class="form-row"><label>💵 saldo atual (R$)</label><input type="number" step="0.01" id="${aba.id}-input-saldo" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+              <div class="form-row"><label>📝 descrição (ex: depósito de R$500)</label><input type="text" id="${aba.id}-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: depósito mensal"></div>
+              <button onclick="saveRendimento('${aba.id}')" style="background:var(--dark);color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 registrar</button>
             </div>
           </div>
           <div class="table-section" style="margin-top:16px;">
             <div class="table-header"><h2>📋 histórico</h2></div>
-            <div id="${abaId}-rend-hist"></div>
+            <div id="${aba.id}-rend-hist"></div>
           </div>
           <div style="text-align:center;margin-top:24px;padding-bottom:8px;">
-            <button onclick="delAbaCustom('${abaId}')" style="background:none;border:none;color:var(--rose);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑️ apagar esta página</button>
+            <button onclick="delAbaCustom('${aba.id}')" style="background:none;border:none;color:var(--rose);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑️ apagar esta página</button>
           </div>
         </main>`;
       container.appendChild(page);
-      renderRendimento(abaId);
+      renderRendimento(aba.id);
       return;
     }
     const page=document.createElement('div');
@@ -1820,59 +1823,40 @@ function _serializeDB(){
 }
 
 async function loadData(){
-  // 1. Cache local — render imediato sem esperar Supabase
-  const bk=localStorage.getItem('cc_bk');
-  if(bk){try{_applyData(JSON.parse(bk));}catch(e){console.warn('cache inválido',e);}}
-  rebuildAllSelects();
-  injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
-  buildSidebarPersonal();buildDynamicPages();buildPmBancoSelect();
-  renderAll();
-  // 2. Buscar dados frescos do Supabase
-  syncBar('syncing','☁️ sincronizando...');
+  syncBar('syncing','☁️ carregando...');
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1&select=data`,{
       headers:{
         'apikey':SUPA_KEY,
-        'Authorization':'Bearer '+SUPA_KEY,
-        'Cache-Control':'no-cache'
+        'Authorization':'Bearer '+SUPA_KEY
       }
     });
     if(!r.ok)throw new Error('HTTP '+r.status);
     const rows=await r.json();
-    if(!Array.isArray(rows)||rows.length===0)throw new Error('Nenhum dado no Supabase');
-    if(rows[0].data){
-      _applyData(rows[0].data);
-      // Atualizar cache
-      try{localStorage.setItem('cc_bk',JSON.stringify(rows[0].data));}catch(e){
-        try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(rows[0].data));}catch(e2){}
-      }
-      console.log('[loadData] dados do Supabase aplicados, cartao:',DB.cartao.length,'pessoal:',DB.pessoal.length);
-    }
+    if(!Array.isArray(rows)||rows.length===0)throw new Error('Sem dados no Supabase');
+    if(rows[0].data)_applyData(rows[0].data);
+    _dataReady=true;
     syncBar('ok','✅ sincronizado!');
   }catch(e){
-    console.error('loadData error:',e);
-    syncBar('error','⚠️ sem conexão — usando cache local. Clique para tentar novamente.');
-    // Não retornar — continuar com o cache que já foi aplicado
+    console.error('loadData:',e);
+    syncBar('error','⚠️ erro ao carregar — clique para tentar novamente');
+    _dataReady=false;
   }
-  // 3. Re-render com dados frescos (ou cache)
   rebuildAllSelects();
   preencherAptoFuturo();
   injectPersonaCSS();buildSummaryGrid();buildPayersGrid();
-  buildSidebarPersonal();buildDynamicPages();
+  buildSidebarPersonal();buildDynamicPages();buildPmBancoSelect();
   renderAll();
 }
 async function saveData(){
-  // Salvar localStorage imediatamente
-  const _sd=_serializeDB();
-  try{localStorage.setItem('cc_bk',JSON.stringify(_sd));}catch(e){
-    try{localStorage.clear();localStorage.setItem('cc_bk',JSON.stringify(_sd));}catch(e2){}
+  if(!_dataReady){
+    syncBar('error','⚠️ aguardando dados da nuvem antes de salvar...');
+    return;
   }
   syncBar('syncing','☁️ salvando...');
-  // Debounce de 400ms para evitar múltiplos saves seguidos
   if(saveTimer)clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{
     try{
-      const payload=JSON.stringify({data:_serializeDB()});
       const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1`,{
         method:'PATCH',
         headers:{
@@ -1881,21 +1865,20 @@ async function saveData(){
           'Content-Type':'application/json',
           'Prefer':'return=minimal'
         },
-        body:payload
+        body:JSON.stringify({data:_serializeDB()})
       });
       if(!r.ok){
         const txt=await r.text().catch(()=>'');
         throw new Error('HTTP '+r.status+(txt?' — '+txt.slice(0,120):''));
       }
-      // Atualizar cache com dado confirmado
-      try{localStorage.setItem('cc_bk',JSON.stringify(_serializeDB()));}catch(e){}
-      syncBar('ok','✅ salvo na nuvem!');
+      syncBar('ok','✅ salvo!');
     }catch(e){
-      console.error('saveData error:',e);
-      syncBar('error','⚠️ erro ao salvar — clique para tentar: '+e.message);
+      console.error('saveData:',e);
+      syncBar('error','⚠️ erro ao salvar: '+e.message);
     }
   },400);
 }
+
 
 // ══ SELECTS ══
 function getCartaoRange(){
