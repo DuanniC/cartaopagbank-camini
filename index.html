@@ -147,6 +147,7 @@ tbody tr:hover{background:var(--cream);}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 td{padding:13px 22px;font-size:0.85rem;vertical-align:middle;}
 .store-name{font-weight:500;overflow-wrap:break-word;word-break:break-word;}
+.val-mes-mobile{display:none;} /* escondido no desktop */
 .col-nome{min-width:180px;}
 .desc-name{font-size:0.74rem;color:var(--mocha);margin-top:4px;font-style:italic;overflow-wrap:break-word;word-break:break-word;}
 .badge{border-radius:10px;padding:3px 8px;font-size:0.72rem;font-weight:500;white-space:nowrap;display:inline-block;}
@@ -284,10 +285,12 @@ input[type=month]::-webkit-date-and-time-value{
     line-height:1.3;vertical-align:middle;
   }
   /* col nome: full width no mobile */
-  .col-nome{display:block!important;width:100%!important;padding:0!important;margin-bottom:4px;}
-  /* cartão: esconder total geral e divisão, mostrar parcelas + este mês + pagadores */
-  .tbl-cartao td:nth-child(3),.tbl-cartao td:nth-child(6){display:none!important;}
-  /* pessoal: esconder pagamento, manter cat+valor+banco+status */
+  .col-nome{display:block!important;width:100%!important;padding:0!important;margin-bottom:2px;}
+  /* cartão mobile: esconder total geral, divisão e valor-mês duplicado */
+  .tbl-cartao td:nth-child(3),.tbl-cartao td:nth-child(6),.tbl-cartao .val-mes-desktop{display:none!important;}
+  /* mostrar valor inline dentro do col-nome */
+  .val-mes-mobile{display:block!important;}
+  /* pessoal: esconder pagamento */
   .tbl-pessoal td:nth-child(4){display:none!important;}
   /* ações: push to right */
   .tbl-cartao td:last-child,.tbl-pessoal td:last-child,.tbl-ronaldo td:last-child{margin-left:auto;}
@@ -333,6 +336,16 @@ input[type=month]::-webkit-date-and-time-value{
 .btn-dashed{width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;}
 .flex-gap6{display:flex;gap:6px;}
 .flex-1-min0{flex:1;min-width:0;}
+/* Cards colapsáveis (meta e rendimento) */
+.collapsible-card{background:var(--white);border-radius:16px;box-shadow:0 3px 14px var(--shadow);overflow:hidden;margin-bottom:16px;}
+.collapsible-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color 0.2s;}
+.collapsible-header:hover{background:var(--cream);}
+.collapsible-header.open{border-bottom-color:var(--blush);}
+.collapsible-header h2{font-family:'Playfair Display',serif;font-size:1rem;color:var(--mocha);margin:0;}
+.collapsible-arrow{font-size:0.8rem;color:var(--rose);transition:transform 0.25s;display:inline-block;}
+.collapsible-arrow.open{transform:rotate(90deg);}
+.collapsible-body{display:none;padding:16px 18px;}
+.collapsible-body.open{display:block;}
 </style>
 <style id="dynamic-persona-css"></style>
 </head>
@@ -552,34 +565,46 @@ input[type=month]::-webkit-date-and-time-value{
       <div class="bc"><div class="bc-icon">🏁</div><div class="bc-label">Falta</div><div class="bc-value" id="mc-falta" style="color:#9b5c5c;">R$ 0,00</div></div>
     </div>
 
-    <div class="table-section" style="margin-bottom:16px;">
-      <div class="table-header"><h2>🎯 definir meta</h2></div>
-      <div style="padding:16px 20px;display:flex;gap:10px;align-items:flex-end;">
-        <div style="flex:1;"><label class="lbl-field">valor da meta (R$)</label>
-        <input type="number" step="0.01" id="mc-input-meta" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="5000,00" oninput="renderMetaCelular()"></div>
-        <button onclick="saveMetaCelular()" style="background:var(--dark);color:white;border:none;border-radius:10px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:500;cursor:pointer;white-space:nowrap;">💾 salvar</button>
+    <div class="collapsible-card">
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <h2>🎯 definir meta</h2><span class="collapsible-arrow">›</span>
       </div>
-    </div>
-
-    <div class="table-section" style="margin-bottom:16px;">
-      <div class="table-header"><h2>➕ adicionar valor</h2></div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div class="form-grid">
-          <div><label class="lbl-field">valor guardado (R$)</label>
-          <input type="number" step="0.01" id="mc-input-add" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
-          <div><label class="lbl-field">data (editável)</label>
-          <input type="date" id="mc-input-data" style="background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
+      <div class="collapsible-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <div style="flex:1;"><label class="lbl-field">valor da meta (R$)</label>
+          <input type="number" step="0.01" id="mc-input-meta" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="5000,00" oninput="renderMetaCelular()"></div>
+          <button onclick="saveMetaCelular()" style="background:var(--dark);color:white;border:none;border-radius:10px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:500;cursor:pointer;white-space:nowrap;">💾 salvar</button>
         </div>
-        <div><label class="lbl-field">descrição</label>
-        <input type="text" id="mc-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: dinheiro guardado em janeiro"></div>
-        <button onclick="addMetaCelular()" style="background:#71557A;color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">+ guardar</button>
       </div>
     </div>
 
-    <div class="table-section" style="margin-bottom:16px;">
-      <div class="table-header"><h2>📋 histórico</h2></div>
-      <div id="mc-hist"></div>
-      <div id="mc-hist-empty" class="empty-state" style="display:none;"><p>nenhum valor adicionado ainda</p></div>
+    <div class="collapsible-card">
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <h2>➕ adicionar valor</h2><span class="collapsible-arrow">›</span>
+      </div>
+      <div class="collapsible-body">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="form-grid">
+            <div><label class="lbl-field">valor guardado (R$)</label>
+            <input type="number" step="0.01" id="mc-input-add" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+            <div><label class="lbl-field">data (editável)</label>
+            <input type="date" id="mc-input-data" style="background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
+          </div>
+          <div><label class="lbl-field">descrição</label>
+          <input type="text" id="mc-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: dinheiro guardado em janeiro"></div>
+          <button onclick="addMetaCelular()" style="background:#71557A;color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">+ guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapsible-card">
+      <div class="collapsible-header open" onclick="toggleCollapse(this)">
+        <h2>📋 histórico</h2><span class="collapsible-arrow open">›</span>
+      </div>
+      <div class="collapsible-body open" style="padding:0;">
+        <div id="mc-hist"></div>
+        <div id="mc-hist-empty" class="empty-state" style="display:none;"><p>nenhum valor adicionado ainda</p></div>
+      </div>
     </div>
 
     <div style="text-align:center;padding:8px 0 20px;">
@@ -604,35 +629,43 @@ input[type=month]::-webkit-date-and-time-value{
       <div class="bc"><div class="bc-icon">🏆</div><div class="bc-label">Rendimento total</div><div class="bc-value" id="rp-rend-total" style="color:#4a8050;">R$ 0,00</div></div>
     </div>
 
-    <div class="table-section" style="margin-bottom:16px;">
-      <div class="table-header"><h2>✏️ novo lançamento</h2></div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
-        <div class="form-grid">
-          <div><label class="lbl-field">saldo atual (R$) *</label>
-          <input type="number" step="0.01" id="rp-input-saldo" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: 10500,00"></div>
-          <div><label class="lbl-field">data (editável)</label>
-          <input type="date" id="rp-input-data" style="background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
-        </div>
-        <div><label class="lbl-field">descrição (ex: março 2026)</label>
-        <input type="text" id="rp-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: março 2026"></div>
-        <div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid var(--blush);">
-          <div style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);font-weight:500;margin-bottom:10px;">movimentações neste período (opcional)</div>
+    <div class="collapsible-card">
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <h2>✏️ novo lançamento</h2><span class="collapsible-arrow">›</span>
+      </div>
+      <div class="collapsible-body">
+        <div style="display:flex;flex-direction:column;gap:12px;">
           <div class="form-grid">
-            <div><label style="display:block;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:#4a8050;margin-bottom:5px;font-weight:500;">➕ aporte (R$)</label>
-            <input type="number" step="0.01" id="rp-input-aporte" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--white);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
-            <div><label style="display:block;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:#9b5c5c;margin-bottom:5px;font-weight:500;">➖ retirada (R$)</label>
-            <input type="number" step="0.01" id="rp-input-retirada" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--white);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+            <div><label class="lbl-field">saldo atual (R$) *</label>
+            <input type="number" step="0.01" id="rp-input-saldo" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: 10500,00"></div>
+            <div><label class="lbl-field">data (editável)</label>
+            <input type="date" id="rp-input-data" style="background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;"></div>
           </div>
-          <div style="font-size:0.74rem;color:var(--dusty);margin-top:8px;">Rendimento = saldo atual − saldo anterior − aportes + retiradas</div>
+          <div><label class="lbl-field">descrição (ex: março 2026)</label>
+          <input type="text" id="rp-input-desc" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:9px 12px;color:var(--dark);outline:none;" placeholder="ex: março 2026"></div>
+          <div style="background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid var(--blush);">
+            <div style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--dusty);font-weight:500;margin-bottom:10px;">movimentações neste período (opcional)</div>
+            <div class="form-grid">
+              <div><label style="display:block;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:#4a8050;margin-bottom:5px;font-weight:500;">➕ aporte (R$)</label>
+              <input type="number" step="0.01" id="rp-input-aporte" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--white);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+              <div><label style="display:block;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:#9b5c5c;margin-bottom:5px;font-weight:500;">➖ retirada (R$)</label>
+              <input type="number" step="0.01" id="rp-input-retirada" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.91rem;background:var(--white);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;" placeholder="0,00"></div>
+            </div>
+            <div style="font-size:0.74rem;color:var(--dusty);margin-top:8px;">Rendimento = saldo atual − saldo anterior − aportes + retiradas</div>
+          </div>
+          <button onclick="addRendimento()" style="background:#3A345B;color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 registrar lançamento</button>
         </div>
-        <button onclick="addRendimento()" style="background:#3A345B;color:white;border:none;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;">💾 registrar lançamento</button>
       </div>
     </div>
 
-    <div class="table-section" style="margin-bottom:16px;">
-      <div class="table-header"><h2>📋 histórico de lançamentos</h2></div>
-      <div id="rp-hist"></div>
-      <div id="rp-hist-empty" class="empty-state"><p>nenhum lançamento ainda</p></div>
+    <div class="collapsible-card">
+      <div class="collapsible-header open" onclick="toggleCollapse(this)">
+        <h2>📋 histórico de lançamentos</h2><span class="collapsible-arrow open">›</span>
+      </div>
+      <div class="collapsible-body open" style="padding:0;">
+        <div id="rp-hist"></div>
+        <div id="rp-hist-empty" class="empty-state"><p>nenhum lançamento ainda</p></div>
+      </div>
     </div>
 
     <div style="text-align:center;padding:8px 0 20px;">
@@ -1784,6 +1817,14 @@ function saveBancos(){
   saveData();closeBancosModal();toast('✅ bancos salvos!');
 }
 
+function toggleCollapse(header){
+  const arrow=header.querySelector('.collapsible-arrow');
+  const body=header.nextElementSibling;
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  header.classList.toggle('open',!isOpen);
+  if(arrow)arrow.classList.toggle('open',!isOpen);
+}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
@@ -2219,7 +2260,21 @@ function renderCartao(){const PC=getPC();
     const tags=(e.payers||[]).map(pp=>{const pc=PC[pp]||{emoji:'👤',label:pp,tag:'tag-'+pp};return`<span class="person-tag ${pc.tag}">${pc.emoji} ${pc.label}</span>`;}).join('');
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
     let sd='';if(e.splitMode==='custom'&&e.customSplit&&(e.payers||[]).length>1)sd=(e.payers||[]).map(pp=>{const pc=PC[pp]||{emoji:'👤'};return`${pc.emoji} ${fmt(e.customSplit[pp]||0)}`;}).join('<br>');
-    return`<tr><td class="col-nome"><div class="store-name">${e.store||''}</div><div class="desc-name">${e.desc||''}</div></td><td>${badge}</td><td><div class="value-bold">${fmt(e.total)}</div></td><td><div class="value-sub">${fmt(p.value)}</div></td><td>${tags}</td><td style="font-size:0.8rem;">${sd}</td><td><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td></tr>`;
+    return`<tr>
+      <td class="col-nome">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+          <div class="store-name" style="flex:1;min-width:0;">${e.desc||''}</div>
+          <div class="val-mes-mobile" style="font-family:var(--font-num);font-size:1rem;font-weight:700;color:var(--dark);white-space:nowrap;flex-shrink:0;">${fmt(p.value)}</div>
+        </div>
+        <div class="desc-name">${e.store||''}</div>
+      </td>
+      <td>${badge}</td>
+      <td><div class="value-bold">${fmt(e.total)}</div></td>
+      <td class="val-mes-desktop"><div class="value-sub">${fmt(p.value)}</div></td>
+      <td>${tags}</td>
+      <td style="font-size:0.8rem;">${sd}</td>
+      <td><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td>
+    </tr>`;
   }).join('');
 }
 function setFilter(p){const PC=getPC();
@@ -2330,7 +2385,23 @@ function renderDuanni(){
     const stLbl=stMes==='pago'?'✅ Pago':'⏳ Pendente';
     const banco=e.banco&&BANCOS[e.banco]?`<span class="banco-tag">${BANCOS[e.banco]}</span>`:'<span style="color:var(--rose);font-size:0.76rem;">—</span>';
     const totalLine=(!isRec&&parc>1)?`<div style="margin-top:5px;font-size:0.74rem;color:var(--dusty);font-family:var(--font-num);">${fmt(e.total)}&nbsp;<span style="opacity:0.7;">total</span>&nbsp;·&nbsp;${diff+1}/${parc}x</div>`:'';
-    return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:5px;"><div style="min-width:0;flex:1;overflow:hidden;"><span class="store-name" style="display:block;">${e.desc}</span>${e.obs?`<span class="desc-name">${e.obs}</span>`:""}</div><div class="action-btns" style="flex-shrink:0;"><button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button><button class="btn-del" onclick="delPessoal('${e.id}')">✕</button></div></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;"><span class="cat-tag ${cat.cls}">${cat.label}</span><span class="value-bold">${fmt(valMes)}</span>${banco}<button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button></div>${totalLine}</div>`;
+    return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px;">
+        <span class="store-name" style="flex:1;min-width:0;">${e.desc}</span>
+        <span class="value-bold" style="white-space:nowrap;flex-shrink:0;">${fmt(valMes)}</span>
+      </div>
+      ${e.obs?`<div class="desc-name" style="margin-bottom:5px;">${e.obs}</div>`:`<div style="margin-bottom:5px;"></div>`}
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;">
+        <span class="cat-tag ${cat.cls}">${cat.label}</span>
+        ${banco}
+        <button class="btn-status-toggle ${stCls}" onclick="togglePessoalStatus('${e.id}','${month}')">${stLbl}</button>
+        <div class="action-btns" style="margin-left:auto;">
+          <button class="btn-edit" onclick="openPessoalModal('${e.id}')">✏️</button>
+          <button class="btn-del" onclick="delPessoal('${e.id}')">✕</button>
+        </div>
+      </div>
+      ${totalLine}
+    </div>`;
   }).join('');
 }
 
@@ -2409,7 +2480,7 @@ function renderRonaldo(){
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
     return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);display:flex;align-items:center;gap:10px;">
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:500;font-size:0.88rem;color:var(--dark);">${e.store}<span style="font-size:0.74rem;color:var(--mocha);font-style:italic;margin-left:6px;">${e.desc}</span></div>
+        <div style="font-weight:500;font-size:0.88rem;color:var(--dark);">${e.desc}<span style="font-size:0.74rem;color:var(--mocha);font-style:italic;margin-left:6px;">${e.store}</span></div>
         <div style="margin-top:4px;">${badge}</div>
       </div>
       <div style="font-family:var(--font-num);font-size:0.9rem;font-weight:600;color:var(--dark);white-space:nowrap;">${fmt(share)}</div>
