@@ -124,7 +124,7 @@ main{padding:26px 30px;max-width:1100px;margin:0 auto;}
 /* card backgrounds gerados dinamicamente por injectPersonaCSS() */
 .summary-card.active-filter{box-shadow:0 0 0 3px var(--rose),0 6px 22px var(--shadow-md);transform:translateY(-2px);}
 .p-emoji{font-size:2.6rem;margin-bottom:12px;display:block;line-height:1;}
-.p-name{font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:600;margin-bottom:12px;}
+.p-name{font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mocha);font-weight:600;margin-bottom:0px;}
 .p-total{font-family:var(--font-num)!important;font-size:1.55rem;font-weight:700;line-height:1.1;letter-spacing:-0.01em;}
 .p-total span{font-size:1.1rem;font-family:'DM Sans',sans-serif;font-weight:600;}
 .card-hint{display:none;}
@@ -402,6 +402,7 @@ input[type=month]::-webkit-date-and-time-value{
         <h2 id="c-table-title">✨ despesas do mês</h2>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="btn-add" style="background:var(--cream);color:var(--mocha);border:1px solid var(--blush);" onclick="openPessoasModal()" title="editar pessoas">👥</button>
+          <button class="btn-add" style="background:var(--cream);color:var(--mocha);border:1px solid var(--blush);" onclick="openDiaCortModal()" title="dia de corte do cartão">✂️</button>
           <button class="btn-add btn-dark" onclick="openCartaoModal()">+ adicionar</button>
         </div>
       </div>
@@ -949,6 +950,26 @@ input[type=month]::-webkit-date-and-time-value{
   </div>
 </div>
 
+<!-- MODAL DIA DE CORTE -->
+<div class="overlay" id="ov-dia-corte">
+  <div class="modal" style="max-width:340px;text-align:center;">
+    <h3>✂️ dia de corte do cartão</h3>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:20px;">Compras feitas a partir desse dia já entram na fatura do mês seguinte.</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:8px;">
+      <button onclick="ajustCorte(-1)" style="background:var(--blush);color:var(--mocha);border:none;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;font-weight:600;">−</button>
+      <div style="text-align:center;">
+        <div id="corte-dia-display" style="font-family:var(--font-num);font-size:2.8rem;font-weight:700;color:var(--dark);line-height:1;">9</div>
+        <div style="font-size:0.72rem;color:var(--dusty);letter-spacing:0.08em;text-transform:uppercase;">dia do mês</div>
+      </div>
+      <button onclick="ajustCorte(1)" style="background:var(--blush);color:var(--mocha);border:none;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;font-weight:600;">+</button>
+    </div>
+    <div id="corte-preview" style="font-size:0.8rem;color:var(--mocha);background:var(--cream);border-radius:10px;padding:8px 14px;margin:12px 0 20px;"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeDiaCortModal()">cancelar</button>
+      <button class="btn-modal-save btn-dark" onclick="saveDiaCorte()">💾 salvar</button>
+    </div>
+  </div>
+</div>
 <div class="sync-bar" id="sync-bar" onclick="this.classList.contains('error')&&loadData()"></div>
 <div class="toast" id="toast"></div>
 
@@ -961,7 +982,7 @@ const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null};
+let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9};
 let saveTimer=null;
 let _dataReady=false;
 // Limpar qualquer cache local antigo
@@ -1033,6 +1054,14 @@ const NOW=new Date();
 const TODAY=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 
 // ══ MONTH UTILS ══
+// Retorna o mês de competência de uma compra feita hoje, considerando o dia de corte
+function getMesCompraAuto(){
+  const dia=NOW.getDate();
+  const corte=DB.diaCorte||9;
+  // Se hoje >= dia de corte, a compra cai no mês seguinte
+  if(dia>=corte) return shiftM(TODAY,1);
+  return TODAY;
+}
 function addMos(y,m,n){let ny=y,nm=m+n;while(nm>12){nm-=12;ny++;}while(nm<1){nm+=12;ny--;}return`${ny}-${String(nm).padStart(2,'0')}`;}
 function shiftM(ym,n){const[y,m]=ym.split('-').map(Number);return addMos(y,m,n);}
 function getML(v){if(!v)return'—';const[y,m]=v.split('-').map(Number);return`${MN[m-1]} ${y}`;}
@@ -1821,6 +1850,43 @@ function toggleCollapse(header){
   header.classList.toggle('open',!isOpen);
   if(arrow)arrow.classList.toggle('open',!isOpen);
 }
+let _diaCorteEdit=9;
+function openDiaCortModal(){
+  _diaCorteEdit=DB.diaCorte||9;
+  document.getElementById('corte-dia-display').textContent=_diaCorteEdit;
+  updateCortePreview();
+  document.getElementById('ov-dia-corte').classList.add('active');
+}
+function closeDiaCortModal(){document.getElementById('ov-dia-corte').classList.remove('active');}
+function ajustCorte(n){
+  _diaCorteEdit=Math.min(28,Math.max(1,_diaCorteEdit+n));
+  document.getElementById('corte-dia-display').textContent=_diaCorteEdit;
+  updateCortePreview();
+}
+function updateCortePreview(){
+  const dia=NOW.getDate();
+  const corte=_diaCorteEdit;
+  const mesAtual=MN[NOW.getMonth()];
+  const mesProx=MN[(NOW.getMonth()+1)%12];
+  let txt='';
+  if(dia>=corte){
+    txt=`Hoje (dia ${dia}) ≥ corte (dia ${corte}) → compras caem em <b>${mesProx}</b>`;
+  } else {
+    txt=`Hoje (dia ${dia}) < corte (dia ${corte}) → compras caem em <b>${mesAtual}</b>`;
+  }
+  document.getElementById('corte-preview').innerHTML=txt;
+}
+function saveDiaCorte(){
+  DB.diaCorte=_diaCorteEdit;
+  saveData();
+  closeDiaCortModal();
+  toast(`✅ corte definido para dia ${_diaCorteEdit}`);
+  // Atualizar o select do modal de cartão se estiver aberto
+  const mc=document.getElementById('cm-mes-compra');
+  if(mc&&document.getElementById('ov-cartao').classList.contains('active')){
+    mc.value=getMesCompraAuto();
+  }
+}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
@@ -1885,6 +1951,7 @@ function _applyData(d){
   if(d.pagesHidden&&typeof d.pagesHidden==='object')DB.pagesHidden=d.pagesHidden;
   if(Array.isArray(d.descontos))DB.descontos=d.descontos;
   else if(d.descontos===null)DB.descontos=null;
+  if(d.diaCorte!=null)DB.diaCorte=Number(d.diaCorte)||9;
 }
 
 // Retorna apenas os campos que devem ser persistidos no Supabase
@@ -1902,7 +1969,8 @@ function _serializeDB(){
     customCards:DB.customCards||{},
     customData:DB.customData||{},
     pagesHidden:DB.pagesHidden||{},
-    descontos:DB.descontos||null
+    descontos:DB.descontos||null,
+    diaCorte:DB.diaCorte||9
   };
 }
 
@@ -2999,7 +3067,8 @@ function openCartaoModal(id=null){const PC=getPC();buildPayersGrid();
     ['cm-store','cm-desc','cm-total','cm-parcelas','cm-mensal'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
     document.querySelectorAll('#ov-cartao .payer-option input').forEach(c=>c.checked=false);
     setCMSplit('equal');setCType('parc');
-    ['cm-mes-compra','cm-rec-inicio'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=TODAY;});
+    document.getElementById('cm-mes-compra').value=getMesCompraAuto();
+    document.getElementById('cm-rec-inicio').value=TODAY;
     document.getElementById('cm-rec-fim').value='';
   }
   document.getElementById('ov-cartao').classList.add('active');
