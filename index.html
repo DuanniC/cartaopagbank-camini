@@ -1044,7 +1044,7 @@ function getPC(){
   _pcCache=pc;
   return pc;
 }
-function invalidatePC(){_pcCache=null;_abasCache=null;_fmtCache.clear();}
+function invalidatePC(){_pcCache=null;_abasCache=null;}
 function fmt(v){return'<span class="num">R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span>';}
 
 // ══ PERSONAS DINÂMICAS ══
@@ -1126,10 +1126,6 @@ function buildPayersGrid(){
   const pessoas=getPessoas();
   const grid=document.getElementById('cm-payers-grid');
   if(!grid)return;
-  // Só reconstruir se pessoas mudaram
-  const sig=pessoas.map(p=>p.id+'|'+p.emoji+'|'+p.label).join(',');
-  if(grid.dataset.sig===sig)return;
-  grid.dataset.sig=sig;
   grid.innerHTML=pessoas.map(p=>`<label class="payer-option"><input type="checkbox" value="${p.id}"><span>${p.emoji}</span> ${p.label}</label>`).join('');
 }
 
@@ -2989,7 +2985,7 @@ function saveDevoModal(){
 
 
 // ══ CARTÃO MODAL ══
-function openCartaoModal(id=null){const PC=getPC();
+function openCartaoModal(id=null){const PC=getPC();buildPayersGrid();
   cmEditId=id;document.getElementById('cm-title').textContent=id?'✏️ editar despesa':'✨ nova despesa';
   if(id){
     const e=(DB.cartao||[]).find(x=>x.id===id);if(!e)return;
