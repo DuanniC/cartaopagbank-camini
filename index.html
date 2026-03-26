@@ -2532,7 +2532,7 @@ function setFilter(p){const PC=getPC();
   Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.toggle('active-filter',k===personFilter));
   renderCartao();
 }
-function clearFilter(){const PC=getPC();personFilter=null;document.getElementById('person-view-bar').classList.remove('visible');Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.remove('active-filter'));renderCartao();toast('');}
+function clearFilter(){const PC=getPC();personFilter=null;document.getElementById('person-view-bar').classList.remove('visible');Object.keys(PC).forEach(k=>document.getElementById('card-'+k)?.classList.remove('active-filter'));renderCartao();}
 
 // ══ RENDER DUANNI ══
 function renderDuanniAtalhos(){
