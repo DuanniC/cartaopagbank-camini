@@ -426,7 +426,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="page active" id="page-cartao">
   <div class="month-bar">
     <label>📅 mês</label>
-    <select id="c-month-sel" onchange="onCartaoMonthChange()"></select>
+    <select id="c-month-sel" onchange="onCartaoMonthChange();saveMesSel('c-month-sel',this.value)"></select>
     <button class="btn-pill btn-today" id="c-btn-today" onclick="goToday('c-month-sel','c-btn-today',renderCartao)">↩ hoje</button>
   </div>
   <!-- Abas PagBank / Itaú -->
@@ -499,7 +499,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="page" id="page-duanni">
   <div class="month-bar" style="border-bottom-color:#c4a8d4;">
     <label>📅 mês</label>
-    <select id="d-month-sel" onchange="renderDuanni()"></select>
+    <select id="d-month-sel" onchange="renderDuanni();saveMesSel('d-month-sel',this.value)"></select>
     <button class="btn-pill btn-today" id="d-btn-today" onclick="goToday('d-month-sel','d-btn-today',renderDuanni)">↩ hoje</button>
   </div>
   <main>
@@ -532,7 +532,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="page" id="page-alan">
   <div class="month-bar" style="border-bottom-color:#8aaa82;">
     <label>📅 mês</label>
-    <select id="al-month-sel" onchange="renderAlan()"></select>
+    <select id="al-month-sel" onchange="renderAlan();saveMesSel('al-month-sel',this.value)"></select>
     <button class="btn-pill btn-today" id="al-btn-today" onclick="goToday('al-month-sel','al-btn-today',renderAlan)">↩ hoje</button>
   </div>
   <main>
@@ -569,7 +569,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="page" id="page-ronaldo">
   <div class="month-bar" style="border-bottom-color:#b8a08a;">
     <label>📅 mês</label>
-    <select id="ro-month-sel" onchange="renderRonaldo()"></select>
+    <select id="ro-month-sel" onchange="renderRonaldo();saveMesSel('ro-month-sel',this.value)"></select>
     <button class="btn-pill btn-today" id="ro-btn-today" onclick="goToday('ro-month-sel','ro-btn-today',renderRonaldo)">↩ hoje</button>
   </div>
   <main>
@@ -601,7 +601,7 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="page" id="page-apto">
   <div class="month-bar" style="border-bottom-color:#8aaa82;">
     <label>📅 mês</label>
-    <select id="a-month-sel" onchange="renderApto()"></select>
+    <select id="a-month-sel" onchange="renderApto();saveMesSel('a-month-sel',this.value)"></select>
     <button class="btn-pill btn-today" id="a-btn-today" onclick="goToday('a-month-sel','a-btn-today',renderApto)">↩ hoje</button>
   </div>
   <main>
@@ -1087,7 +1087,7 @@ const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9,cartaoStatus:{}};
+let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9,cartaoStatus:{},mesesSel:{}};
 let saveTimer=null;
 let _dataReady=false;
 // Limpar qualquer cache local antigo
@@ -2221,6 +2221,7 @@ function _applyData(d){
   if(d.diaCorte!=null)DB.diaCorte=Number(d.diaCorte)||9;
   if(d.diaCorteConfig&&typeof d.diaCorteConfig==='object')DB.diaCorteConfig=d.diaCorteConfig;
   if(d.cartaoStatus&&typeof d.cartaoStatus==='object')DB.cartaoStatus=d.cartaoStatus;
+  if(d.mesesSel&&typeof d.mesesSel==='object')DB.mesesSel=d.mesesSel;
 }
 
 // Retorna apenas os campos que devem ser persistidos no Supabase
@@ -2241,7 +2242,8 @@ function _serializeDB(){
     descontos:DB.descontos||null,
     diaCorte:DB.diaCorte||9,
     diaCorteConfig:DB.diaCorteConfig||{},
-    cartaoStatus:DB.cartaoStatus||{}
+    cartaoStatus:DB.cartaoStatus||{},
+    mesesSel:DB.mesesSel||{}
   };
 }
 
@@ -2455,13 +2457,12 @@ function rebuildAllSelects(){
   const ams=getAptoMonths();
   let ah='';ams.forEach(v=>{const[y,m]=v.split('-').map(Number);ah+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
   const asel=document.getElementById('a-month-sel');
-  if(asel){const prev=asel.value||TODAY;asel.innerHTML=ah;asel.value=asel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  if(asel){const prev=asel.value||(DB.mesesSel?.['a-month-sel'])||TODAY;asel.innerHTML=ah;asel.value=asel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   // Cartão range
   const cel=document.getElementById('c-month-sel');
   if(cel){
-    const prev=cel.value||TODAY;
+    const prev=cel.value||(DB.mesesSel?.['c-month-sel'])||TODAY;
     cel.innerHTML=ch;
-    // Preferir o mês que estava selecionado, senão TODAY
     const targetVal=cel.querySelector(`option[value="${prev}"]`)?prev:TODAY;
     cel.value=targetVal;
   }
@@ -2469,24 +2470,34 @@ function rebuildAllSelects(){
   const alms=getAlanMonths();
   let alh='';alms.forEach(v=>{const[y,m]=v.split('-').map(Number);alh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
   const alel=document.getElementById('al-month-sel');
-  if(alel){const prev=alel.value||TODAY;alel.innerHTML=alh;alel.value=alel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  if(alel){const prev=alel.value||(DB.mesesSel?.['al-month-sel'])||TODAY;alel.innerHTML=alh;alel.value=alel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   // Smart months Ronaldo
   const roms=getRonaldoMonths();
   let roh='';roms.forEach(v=>{const[y,m]=v.split('-').map(Number);roh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
   const roel=document.getElementById('ro-month-sel');
-  if(roel){const prev=roel.value||TODAY;roel.innerHTML=roh;roel.value=roel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
+  if(roel){const prev=roel.value||(DB.mesesSel?.['ro-month-sel'])||TODAY;roel.innerHTML=roh;roel.value=roel.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
   // Smart months for Duanni
   const pms=getPessoalMonths();
   let dh='';pms.forEach(v=>{const[y,m]=v.split('-').map(Number);dh+=`<option value="${v}">${MN[m-1]} ${y}</option>`;});
   ['d-month-sel','pm-rec-inicio'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
-    const prev=el.value||TODAY;el.innerHTML=dh;el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
+    const prev=el.value||(id==='d-month-sel'?(DB.mesesSel?.['d-month-sel']||TODAY):TODAY);el.innerHTML=dh;el.value=el.querySelector(`option[value="${prev}"]`)?prev:TODAY;
   });
   // pm-mes-compra: mesmo range do cm-mes-compra (12 meses atrás até 3 à frente)
   const pmMC=document.getElementById('pm-mes-compra');
   if(pmMC){const prev=pmMC.value||TODAY;pmMC.innerHTML=cmh;pmMC.value=pmMC.querySelector(`option[value="${prev}"]`)?prev:TODAY;}
 }
-function goToday(selId,btnId,fn){document.getElementById(selId).value=TODAY;document.getElementById(btnId).classList.remove('visible');fn();}
+function saveMesSel(selId,value){
+  if(!DB.mesesSel)DB.mesesSel={};
+  DB.mesesSel[selId]=value;
+  saveData();
+}
+function goToday(selId,btnId,fn){
+  document.getElementById(selId).value=TODAY;
+  document.getElementById(btnId).classList.remove('visible');
+  saveMesSel(selId,TODAY);
+  fn();
+}
 
 // ══ APÊ HELPERS ══
 function getDivisao(){return DB.divisao||{duanni:50,alan:50};}
