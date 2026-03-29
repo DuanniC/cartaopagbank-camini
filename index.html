@@ -57,6 +57,9 @@ header{background:var(--white);border-bottom:1px solid var(--blush);padding:0 22
 .hdr-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--mocha);}
 .hdr-title span{font-style:italic;color:var(--rose);}
 .btn-sync-hdr{margin-left:auto;background:var(--sage-light);color:#4a6044;border:1px solid var(--sage);border-radius:18px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:0.76rem;cursor:pointer;font-weight:500;transition:background 0.2s;}
+.btn-sync-hdr.loading{opacity:0.7;pointer-events:none;}
+.btn-sync-hdr.loading .sync-icon{display:inline-block;animation:spin 0.8s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .btn-sync-hdr:hover{background:#c5d4bc;}
 
 /* PASSWORD MODAL */
@@ -337,7 +340,7 @@ input[type=month]::-webkit-date-and-time-value{
 .btn-dashed{width:100%;background:var(--sage-light);color:#4a6044;border:1.5px dashed var(--sage);border-radius:12px;padding:9px;font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;font-weight:500;}
 .flex-gap6{display:flex;gap:6px;}
 .flex-1-min0{flex:1;min-width:0;}
-/* Abas cartão (PagSeguro / Itaú) */
+/* Abas cartão (PagBank / Itaú) */
 .cartao-tabs{display:flex;gap:0;background:var(--cream);border-bottom:2px solid var(--blush);padding:0 16px;}
 .cartao-tab{padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;color:var(--dusty);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.18s;}
 .cartao-tab:hover{color:var(--mocha);}
@@ -353,7 +356,7 @@ input[type=month]::-webkit-date-and-time-value{
 .group-header.gh-pag{color:#7b5ea7;background:#f5f0ff;}
 /* Banner pagseg somente-leitura */
 .banner-readonly{background:linear-gradient(135deg,#5a4a7a,#7b5ea7,#9b7ec7);box-shadow:0 5px 20px rgba(91,74,122,0.3);}
-/* ── Banner PagSeguro ── */
+/* ── Banner PagBank ── */
 .pag-banner{flex-direction:column!important;gap:0!important;padding:20px 22px 16px!important;justify-content:flex-start!important;align-items:stretch!important;}
 .pag-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .pag-label{font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;opacity:0.85;font-weight:500;}
@@ -369,7 +372,7 @@ input[type=month]::-webkit-date-and-time-value{
 .pag-encerrar-btn{background:rgba(255,255,255,0.2);color:white;border:1.5px solid rgba(255,255,255,0.45);border-radius:10px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:0.76rem;cursor:pointer;font-weight:600;transition:background 0.2s;}
 .pag-encerrar-btn:hover{background:rgba(255,255,255,0.32);}
 @media(max-width:700px){
-  .pag-banner{padding:16px 40px 14px!important;border-radius:16px!important;margin-bottom:14px!important;}
+  .pag-banner{padding:16px 16px 14px!important;border-radius:16px!important;margin-bottom:14px!important;}
   .pag-val-block{padding:14px 12px;}
   .pag-val-num{font-size:1.35rem;}
   .pag-val-title{font-size:0.62rem;}
@@ -416,7 +419,7 @@ input[type=month]::-webkit-date-and-time-value{
 <header>
   <button class="btn-menu" onclick="toggleSidebar()">☰</button>
   <div class="hdr-title" id="hdr-title">💳 <span>Compartilhado</span></div>
-  <button class="btn-sync-hdr" onclick="loadData()">🔄 sync</button>
+  <button class="btn-sync-hdr" id="btn-sync-hdr" onclick="loadData()"><span class="sync-icon">🔄</span> sync</button>
 </header>
 
 <!-- PAGE CARTÃO -->
@@ -426,10 +429,10 @@ input[type=month]::-webkit-date-and-time-value{
     <select id="c-month-sel" onchange="onCartaoMonthChange()"></select>
     <button class="btn-pill btn-today" id="c-btn-today" onclick="goToday('c-month-sel','c-btn-today',renderCartao)">↩ hoje</button>
   </div>
-  <!-- Abas PagSeguro / Itaú -->
+  <!-- Abas PagBank / Itaú -->
   <div class="cartao-tabs">
     <button class="cartao-tab tab-itau active" id="tab-itau" onclick="setCartaoAba('itau')">💳 Itaú</button>
-    <button class="cartao-tab tab-pagseg" id="tab-pagseg" onclick="setCartaoAba('pagseguro')">🟣 PagSeguro</button>
+    <button class="cartao-tab tab-pagseg" id="tab-pagseg" onclick="setCartaoAba('pagseguro')">🟣 PagBank</button>
   </div>
   <div class="person-view-bar" id="person-view-bar">
     <span id="pv-emoji" style="font-size:1.1rem">🌸</span>
@@ -443,10 +446,10 @@ input[type=month]::-webkit-date-and-time-value{
       <div><div class="b-label" id="c-fat-label">💸 fatura Itaú do mês</div><div class="b-total" id="c-fat-total">R$ 0,00</div></div>
       <div class="b-month" id="c-fat-month">—</div>
     </div>
-    <!-- Banner PagSeguro (somente leitura) -->
+    <!-- Banner PagBank (somente leitura) -->
     <div class="banner banner-readonly pag-banner" id="banner-pagseg" style="display:none;">
       <div class="pag-top">
-        <span class="pag-label">🟣 PagSeguro — parcelas em aberto</span>
+        <span class="pag-label">🟣 PagBank — parcelas em aberto</span>
         <span class="pag-month" id="c-pag-month">—</span>
       </div>
       <div class="pag-values">
@@ -463,8 +466,11 @@ input[type=month]::-webkit-date-and-time-value{
       </div>
       <div class="pag-footer">
         <span class="pag-hint">somente acompanhamento</span>
-        <div id="c-pag-encerrar-wrap" style="display:none;">
-          <button onclick="encerrarPagSeguro()" class="pag-encerrar-btn">🗑️ encerrar aba PagSeguro</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button onclick="pagarTotalPagBank()" class="pag-encerrar-btn" style="background:rgba(60,130,80,0.25);border-color:rgba(100,200,120,0.5);">✅ pago total</button>
+          <div id="c-pag-encerrar-wrap" style="display:none;">
+            <button onclick="encerrarPagSeguro()" class="pag-encerrar-btn">🗑️ encerrar aba PagBank</button>
+          </div>
         </div>
       </div>
     </div>
@@ -482,6 +488,9 @@ input[type=month]::-webkit-date-and-time-value{
         <th>🔖 este mês</th><th>👤 pagadores</th><th>📊 divisão</th><th></th>
       </tr></thead><tbody id="cartao-table"></tbody></table>
       <div id="cartao-empty" class="empty-state"><div class="icon">💳</div><p>nenhuma despesa neste mês...</p></div>
+      <div id="cartao-pagbank-footer" style="display:none;text-align:center;padding:12px 16px;border-top:1px solid var(--blush);">
+        <button onclick="encerrarPagSeguro()" style="background:none;border:none;color:var(--rose);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;opacity:0.8;">🗑️ apagar aba PagBank permanentemente</button>
+      </div>
     </div>
   </main>
 </div>
@@ -566,7 +575,10 @@ input[type=month]::-webkit-date-and-time-value{
   <main>
     <div class="banner banner-pessoa-ronaldo" id="banner-ronaldo">
       <div><div class="b-label" id="ro-banner-label">🏔️ total do Ronaldo no mês</div><div class="b-total" id="ro-total">R$ 0,00</div></div>
-      <div class="b-month" id="ro-month-lbl">—</div>
+      <div style="text-align:right;">
+        <div class="b-month" id="ro-month-lbl">—</div>
+        <button onclick="pagarTotalRonaldo()" style="margin-top:8px;background:rgba(255,255,255,0.22);color:white;border:1.5px solid rgba(255,255,255,0.45);border-radius:12px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:0.75rem;cursor:pointer;font-weight:500;">✅ pago total</button>
+      </div>
     </div>
 
     <div id="ronaldo-custom-cards-top"></div>
@@ -602,6 +614,7 @@ input[type=month]::-webkit-date-and-time-value{
       <div style="text-align:right;">
         <div class="b-month" id="a-month-lbl">—</div>
         <button onclick="openDivisaoModal()" style="margin-top:8px;background:rgba(255,255,255,0.22);color:white;border:1.5px solid rgba(255,255,255,0.45);border-radius:12px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:0.75rem;cursor:pointer;font-weight:500;">⚖️ divisão</button>
+        <button onclick="pagarTotalApto()" style="margin-top:6px;background:rgba(60,180,100,0.28);color:white;border:1.5px solid rgba(100,220,140,0.5);border-radius:12px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:0.75rem;cursor:pointer;font-weight:500;">✅ pago total</button>
       </div>
     </div>
     <div id="apto-cards-grid" class="apto-grid-mobile" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
@@ -690,7 +703,7 @@ input[type=month]::-webkit-date-and-time-value{
   <main>
     <button onclick="voltarParaDuanni()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--mocha);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;padding:8px 0 4px;font-weight:500;">← voltar para Duanni</button>
     <div class="banner" style="flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#3A345B,#4b3d6a,#71557A);box-shadow:0 5px 20px rgba(58,52,91,0.40);">
-      <div class="b-label">💰 rendimento — PagSeguro</div>
+      <div class="b-label">💰 rendimento — PagBank</div>
       <div class="b-total" id="rp-saldo-atual">R$ 0,00</div>
       <div class="b-sub" id="rp-rendeu-sub">adicione um lançamento para começar</div>
     </div>
@@ -920,11 +933,23 @@ input[type=month]::-webkit-date-and-time-value{
       <label>💳 cartão</label>
       <div class="toggle-row">
         <button type="button" id="cm-cartao-itau" class="toggle-btn active" onclick="setCMCartao('itau')">💳 Itaú</button>
-        <button type="button" id="cm-cartao-pag" class="toggle-btn" onclick="setCMCartao('pagseguro')">🟣 PagSeguro</button>
+        <button type="button" id="cm-cartao-pag" class="toggle-btn" onclick="setCMCartao('pagseguro')">🟣 PagBank</button>
       </div>
     </div>
     <div class="form-row"><label>🏪 nome no cartão</label><input id="cm-store" type="text" placeholder="ex: AMAZON MKTPL"></div>
     <div class="form-row"><label>📝 descrição real</label><input id="cm-desc" type="text" placeholder="ex: Livro, Plano de celular"></div>
+    <div class="form-row"><label>🏷️ categoria</label>
+      <select id="cm-cat">
+        <option value="presentes">🎁 Presentes</option>
+        <option value="compras">🛍️ Compras online</option>
+        <option value="assinaturas">📱 Assinaturas</option>
+        <option value="streamings">🎬 Streamings</option>
+        <option value="alimentacao">🍽️ Alimentação</option>
+        <option value="saude">💆 Saúde/beleza</option>
+        <option value="lazer">🎉 Lazer</option>
+        <option value="outros">📦 Outros</option>
+      </select>
+    </div>
     <div id="cm-parc-fields">
       <div class="form-grid">
         <div class="form-row"><label>💰 valor total (R$)</label><input id="cm-total" type="number" step="0.01" placeholder="0,00" oninput="cmTotalChange()"></div>
@@ -1033,7 +1058,8 @@ input[type=month]::-webkit-date-and-time-value{
 <div class="overlay" id="ov-dia-corte">
   <div class="modal" style="max-width:340px;text-align:center;">
     <h3>✂️ dia de corte do cartão</h3>
-    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:20px;">Compras feitas a partir desse dia já entram na fatura do mês seguinte.</p>
+    <p style="font-size:0.82rem;color:var(--mocha);margin-bottom:12px;">Defina o corte por mês — compras feitas a partir desse dia caem na fatura do mês seguinte.</p>
+    <div class="form-row" style="margin-bottom:16px;"><label>📅 mês</label><select id="corte-mes-sel" onchange="onCorteMesChange()" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.87rem;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;"></select></div>
     <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:8px;">
       <button onclick="ajustCorte(-1)" style="background:var(--blush);color:var(--mocha);border:none;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;font-weight:600;">−</button>
       <div style="text-align:center;">
@@ -1061,7 +1087,7 @@ const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9};
+let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9,cartaoStatus:{}};
 let saveTimer=null;
 let _dataReady=false;
 // Limpar qualquer cache local antigo
@@ -1118,7 +1144,7 @@ const DEFAULT_BANCOS=[
   {id:'mercadopago',label:'Mercado Pago'},
   {id:'itau',label:'Itaú'},
   {id:'inter',label:'Inter'},
-  {id:'pagseguro',label:'PagSeguro'},
+  {id:'pagseguro',label:'PagBank'},
   {id:'shopee',label:'Shopee'},
 ];
 function getBancos(){return DB.bancos||DEFAULT_BANCOS;}
@@ -1136,10 +1162,14 @@ const TODAY=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 
 // ══ MONTH UTILS ══
 // Retorna o mês de competência de uma compra feita hoje, considerando o dia de corte
+function getDiaCorte(mes){
+  // Retorna o dia de corte para um mês específico, com fallback para o padrão
+  if(DB.diaCorteConfig&&DB.diaCorteConfig[mes]!=null) return DB.diaCorteConfig[mes];
+  return DB.diaCorte||9;
+}
 function getMesCompraAuto(){
   const dia=NOW.getDate();
-  const corte=DB.diaCorte||9;
-  // Se hoje >= dia de corte, a compra cai no mês seguinte
+  const corte=getDiaCorte(TODAY);
   if(dia>=corte) return shiftM(TODAY,1);
   return TODAY;
 }
@@ -1528,6 +1558,8 @@ function renderPage(p){
 }
 
 // ══ META CELULAR (IDs fixos) ══
+let _mcShowAll=false;
+let _rpShowAll=false;
 function mcTodayISO(){const n=new Date();return`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
 function mcFmtDate(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
 
@@ -1568,7 +1600,9 @@ function renderMetaCelular(){
   let acum=0;
   const comAcum=sorted.map(h=>{acum+=(h.valor||0);return{...h,acum};});
   // exibir em ordem reversa (mais recente primeiro)
-  histEl.innerHTML=[...comAcum].reverse().map((h,i)=>{
+  const _mcReversed=[...comAcum].reverse();
+  const _mcLimit=_mcShowAll?_mcReversed.length:8;
+  histEl.innerHTML=_mcReversed.slice(0,_mcLimit).map((h,i)=>{
     const realIdx=hist.findIndex(x=>x.data===h.data&&x.valor===h.valor&&x.desc===h.desc);
     return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);display:flex;justify-content:space-between;align-items:center;">
       <div>
@@ -1582,6 +1616,9 @@ function renderMetaCelular(){
       </div>
     </div>`;
   }).join('');
+  if(_mcReversed.length>8){
+    histEl.innerHTML+=`<div style="text-align:center;padding:10px;"><button onclick="_mcShowAll=!_mcShowAll;renderMetaCelular()" style="background:none;border:1px dashed var(--blush);border-radius:12px;padding:5px 16px;font-family:'DM Sans',sans-serif;font-size:0.76rem;color:var(--dusty);cursor:pointer;">${_mcShowAll?'▲ ver menos':'▼ ver mais ('+(_mcReversed.length-8)+')' }</button></div>`;
+  }
 }
 function mcStartRename(){
   const d=(DB.customData||{})['meta-celular']||{};
@@ -1696,8 +1733,10 @@ function renderRendimentoPagSeg(){
   if(!histEl)return;
   if(sorted.length===0){histEl.innerHTML='';if(emptyEl)emptyEl.style.display='block';return;}
   if(emptyEl)emptyEl.style.display='none';
-  histEl.innerHTML=[...sorted].reverse().map((h,i,arr)=>{
-    const prev=arr[i+1]; // arr revertido: prev é o anterior cronológico
+  const _rpArr=[...sorted].reverse();
+  const _rpLimit=_rpShowAll?_rpArr.length:8;
+  histEl.innerHTML=_rpArr.slice(0,_rpLimit).map((h,i,arr)=>{
+    const prev=arr[i+1];
     const rend=prev?(h.saldo - prev.saldo - (h.aporte||0) + (h.retirada||0)):null;
     const pct=rend!==null&&prev?.saldo>0?(rend/prev.saldo*100):null;
     const rendHtml=rend!==null
@@ -1707,7 +1746,6 @@ function renderRendimentoPagSeg(){
       h.aporte?`<span style="color:#4a8050;">+${fmtR(h.aporte)} aporte</span>`:'',
       h.retirada?`<span style="color:#9b5c5c;">−${fmtR(h.retirada)} retirada</span>`:'',
     ].filter(Boolean).join(' · ');
-    // índice real no array original (não sorted)
     const realIdx=hist.findIndex(x=>x.data===h.data&&x.saldo===h.saldo&&x.desc===h.desc);
     return`<div style="padding:12px 16px;border-bottom:1px solid var(--blush);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -1724,6 +1762,9 @@ function renderRendimentoPagSeg(){
       </div>
     </div>`;
   }).join('');
+  if(_rpArr.length>8){
+    histEl.innerHTML+=`<div style="text-align:center;padding:10px;"><button onclick="_rpShowAll=!_rpShowAll;renderRendimentoPagSeg()" style="background:none;border:1px dashed var(--blush);border-radius:12px;padding:5px 16px;font-family:'DM Sans',sans-serif;font-size:0.76rem;color:var(--dusty);cursor:pointer;">${_rpShowAll?'▲ ver menos':'▼ ver mais ('+(_rpArr.length-8)+')'}</button></div>`;
+  }
 }
 function addRendimento(){
   const saldo=parseFloat(document.getElementById('rp-input-saldo').value);
@@ -1785,7 +1826,7 @@ function criarAbaMetaCelular(){
   navFixedPage('meta-celular',`${e} <span>${n}</span>`,renderMetaCelular);
 }
 function criarAbaRendimento(){
-  navFixedPage('rendimento-pagseg','💰 <span>Rendimento PagSeguro</span>',renderRendimentoPagSeg);
+  navFixedPage('rendimento-pagseg','💰 <span>Rendimento PagBank</span>',renderRendimentoPagSeg);
 }
 
 function delAbaCustom(abaId){
@@ -1856,7 +1897,7 @@ function renderDynamicPage(abaId){
         const parc=isRec?null:(e.parcelas||1);
         const valMes=parc?e.total/parc:e.total;
         pessoalTotal+=valMes;
-        const cat=CATS[e.cat]||{label:'📦 Outros',cls:'cat-outros'};
+        const cat=CATS[e.categoria||e.cat]||CATS.outros;
         const stMes=(e.statusPorMes&&e.statusPorMes[month])||'pendente';
         const stCls=stMes==='pago'?'badge-pago':'badge-pendente';
         const stLbl=stMes==='pago'?'✅ Pago':'⏳ Pendente';
@@ -1933,13 +1974,28 @@ function toggleCollapse(header){
   if(arrow)arrow.classList.toggle('open',!isOpen);
 }
 let _diaCorteEdit=9;
+let _diaCorteEditMes=TODAY;
 function openDiaCortModal(){
-  _diaCorteEdit=DB.diaCorte||9;
+  _diaCorteEditMes=TODAY;
+  _diaCorteEdit=getDiaCorte(TODAY);
   document.getElementById('corte-dia-display').textContent=_diaCorteEdit;
+  // Popular select de mês
+  const sel=document.getElementById('corte-mes-sel');
+  if(sel){
+    const meses=Array.from({length:6},(_,i)=>shiftM(TODAY,i-1));
+    sel.innerHTML=meses.map(m=>`<option value="${m}"${m===TODAY?' selected':''}>${getML(m)}</option>`).join('');
+    sel.value=TODAY;
+  }
   updateCortePreview();
   document.getElementById('ov-dia-corte').classList.add('active');
 }
 function closeDiaCortModal(){document.getElementById('ov-dia-corte').classList.remove('active');}
+function onCorteMesChange(){
+  _diaCorteEditMes=document.getElementById('corte-mes-sel').value;
+  _diaCorteEdit=getDiaCorte(_diaCorteEditMes);
+  document.getElementById('corte-dia-display').textContent=_diaCorteEdit;
+  updateCortePreview();
+}
 function ajustCorte(n){
   _diaCorteEdit=Math.min(28,Math.max(1,_diaCorteEdit+n));
   document.getElementById('corte-dia-display').textContent=_diaCorteEdit;
@@ -1950,26 +2006,155 @@ function updateCortePreview(){
   const corte=_diaCorteEdit;
   const mesAtual=MN[NOW.getMonth()];
   const mesProx=MN[(NOW.getMonth()+1)%12];
-  let txt='';
-  if(dia>=corte){
-    txt=`Hoje (dia ${dia}) ≥ corte (dia ${corte}) → compras caem em <b>${mesProx}</b>`;
-  } else {
-    txt=`Hoje (dia ${dia}) < corte (dia ${corte}) → compras caem em <b>${mesAtual}</b>`;
+  const isMesAtual=_diaCorteEditMes===TODAY;
+  let txt=`<b>${getML(_diaCorteEditMes)}</b>: corte no dia <b>${corte}</b>`;
+  if(isMesAtual){
+    if(dia>=corte) txt+=` — hoje (dia ${dia}) já passou → compras caem em <b>${mesProx}</b>`;
+    else txt+=` — hoje (dia ${dia}) ainda não chegou → compras caem em <b>${mesAtual}</b>`;
   }
   document.getElementById('corte-preview').innerHTML=txt;
 }
 function saveDiaCorte(){
-  DB.diaCorte=_diaCorteEdit;
-  saveData();
-  closeDiaCortModal();
-  toast(`✅ corte definido para dia ${_diaCorteEdit}`);
-  // Atualizar o select do modal de cartão se estiver aberto
+  if(!DB.diaCorteConfig)DB.diaCorteConfig={};
+  if(_diaCorteEditMes===TODAY||_diaCorteEditMes===shiftM(TODAY,-1)){
+    // Mês atual ou anterior: salvar como padrão global
+    DB.diaCorte=_diaCorteEdit;
+  }
+  // Sempre salvar também no config por mês
+  DB.diaCorteConfig[_diaCorteEditMes]=_diaCorteEdit;
+  saveData();closeDiaCortModal();
+  toast(`✅ corte de ${getML(_diaCorteEditMes)}: dia ${_diaCorteEdit}`);
   const mc=document.getElementById('cm-mes-compra');
   if(mc&&document.getElementById('ov-cartao').classList.contains('active')){
     mc.value=getMesCompraAuto();
   }
 }
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+// ══ LÓGICA DE MÊS CONCLUÍDO ══
+
+// Verifica se uma aba do cartão (itau ou pagseguro) está toda paga no mês
+function isCartaoAbaPago(month, cartaoTipo){
+  const itens=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.cartao||'pagseguro')===cartaoTipo);
+  if(itens.length===0)return false; // sem despesas = não pode concluir
+  return itens.every(e=>(DB.cartaoStatus?.[month]?.[e.id]||'pendente')==='pago');
+}
+
+// Verifica se as despesas pessoais do mês estão todas pagas
+function isPessoalPago(month){
+  const pessoal=(DB.pessoal||[]).filter(e=>{
+    if(!e.mesInicio)return false;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const[ty,tm]=month.split('-').map(Number);
+    const diff=(ty-iy)*12+(tm-im);
+    return e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
+  });
+  if(pessoal.length===0)return false;
+  return pessoal.every(e=>(e.statusPorMes&&e.statusPorMes[month])==='pago');
+}
+
+// Verifica se o apartamento está todo pago no mês
+function isAptoPago(month){
+  const apto=(DB.apto||{})[month]||{};
+  const temApto=apto.caixa?.valor||apto.aluguel?.valor;
+  if(!temApto)return false;
+  if(apto.caixa?.valor&&apto.caixa?.status!=='pago')return false;
+  if(apto.aluguel?.valor&&apto.aluguel?.status!=='pago')return false;
+  return Object.values(apto.extras||{}).every(v=>v.status==='pago');
+}
+
+// Verifica se o mês pessoal está TOTALMENTE concluído
+// (despesas pessoais + apartamento — ambos precisam estar pagos)
+function isMesPessoalConcluido(month){
+  const temPessoal=(DB.pessoal||[]).some(e=>{
+    if(!e.mesInicio)return false;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const[ty,tm]=month.split('-').map(Number);
+    const diff=(ty-iy)*12+(tm-im);
+    return e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
+  });
+  const temApto=((DB.apto||{})[month]?.caixa?.valor)||((DB.apto||{})[month]?.aluguel?.valor);
+  // Precisa ter ao menos um item (pessoal ou apto) para considerar
+  if(!temPessoal&&!temApto)return false;
+  if(temPessoal&&!isPessoalPago(month))return false;
+  if(temApto&&!isAptoPago(month))return false;
+  return true;
+}
+
+// Avança um seletor específico para o próximo mês
+function avancarSeletor(selId, month, label){
+  const proximo=shiftM(month,1);
+  rebuildAllSelects();
+  const sel=document.getElementById(selId);
+  if(!sel||sel.value!==month)return false;
+  if(!sel.querySelector(`option[value="${proximo}"]`))return false;
+  sel.value=proximo;
+  return true;
+}
+
+// Verificar e avançar PagBank independentemente
+function verificarPagBank(month){
+  if(!isCartaoAbaPago(month,'pagseguro'))return;
+  if(avancarSeletor('c-month-sel',month)){
+    // Se estávamos na aba PagBank, mudar para ela no novo mês
+    setTimeout(()=>{
+      toast(`🎉 PagBank ${getML(month)} pago! → ${getML(shiftM(month,1))}`,'ok');
+      if(cartaoAba==='pagseguro')renderCartao();
+    },300);
+  }
+}
+
+// Verificar e avançar Itaú independentemente
+function verificarItau(month){
+  if(!isCartaoAbaPago(month,'itau'))return;
+  if(avancarSeletor('c-month-sel',month)){
+    setTimeout(()=>{
+      toast(`🎉 Itaú ${getML(month)} pago! → ${getML(shiftM(month,1))}`,'ok');
+      if(cartaoAba==='itau')renderCartao();
+    },300);
+  }
+}
+
+// Verificar e avançar mês pessoal (Duanni + Alan juntos)
+function verificarMesPessoal(month){
+  if(!isMesPessoalConcluido(month))return;
+  const proximo=shiftM(month,1);
+  rebuildAllSelects();
+  let avancou=false;
+  // Avançar Duanni
+  const dSel=document.getElementById('d-month-sel');
+  if(dSel&&dSel.value===month&&dSel.querySelector(`option[value="${proximo}"]`)){
+    dSel.value=proximo;avancou=true;
+  }
+  // Avançar Alan junto
+  const alSel=document.getElementById('al-month-sel');
+  if(alSel&&alSel.value===month&&alSel.querySelector(`option[value="${proximo}"]`)){
+    alSel.value=proximo;
+  }
+  if(avancou){
+    setTimeout(()=>{
+      toast(`🎉 ${getML(month)} concluído! Duanni e Alan → ${getML(proximo)}`,'ok');
+      renderDuanni();renderAlan();
+    },300);
+  }
+}
+
+// Compatibilidade — não faz nada (substituído pela nova lógica)
+function verificarMesConcluido(month){}
+function verificarMesConcluidoAba(aba,month){
+  if(aba==='cartao'){
+    // chamado via toggleCartaoStatus — verificar qual aba estava sendo paga
+    // não avança automaticamente aqui; pagarTotalPagBank/Itau chamam direto
+  } else if(aba==='duanni'||aba==='apto'){
+    verificarMesPessoal(month);
+  }
+}
+
+function toast(msg,tipo){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=tipo==='erro'?'#9b3a3a':tipo==='ok'?'#3a6044':'var(--dark)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),tipo==='erro'?4000:2800);
+}
 function syncBar(s,m){const el=document.getElementById('sync-bar');el.className='sync-bar show '+s;el.textContent=m;if(s==='ok')setTimeout(()=>el.classList.remove('show'),2500);}
 
 // ══ SIDEBAR ══
@@ -2034,6 +2219,8 @@ function _applyData(d){
   if(Array.isArray(d.descontos))DB.descontos=d.descontos;
   else if(d.descontos===null)DB.descontos=null;
   if(d.diaCorte!=null)DB.diaCorte=Number(d.diaCorte)||9;
+  if(d.diaCorteConfig&&typeof d.diaCorteConfig==='object')DB.diaCorteConfig=d.diaCorteConfig;
+  if(d.cartaoStatus&&typeof d.cartaoStatus==='object')DB.cartaoStatus=d.cartaoStatus;
 }
 
 // Retorna apenas os campos que devem ser persistidos no Supabase
@@ -2052,7 +2239,9 @@ function _serializeDB(){
     customData:DB.customData||{},
     pagesHidden:DB.pagesHidden||{},
     descontos:DB.descontos||null,
-    diaCorte:DB.diaCorte||9
+    diaCorte:DB.diaCorte||9,
+    diaCorteConfig:DB.diaCorteConfig||{},
+    cartaoStatus:DB.cartaoStatus||{}
   };
 }
 
@@ -2071,9 +2260,11 @@ async function loadData(){
     if(rows[0].data)_applyData(rows[0].data);
     _dataReady=true;
     syncBar('ok','✅ sincronizado!');
+    const _sb=document.getElementById('btn-sync-hdr');if(_sb)_sb.classList.remove('loading');
   }catch(e){
     console.error('loadData:',e);
     syncBar('error','⚠️ erro ao carregar — clique para tentar novamente');
+    const _sbe=document.getElementById('btn-sync-hdr');if(_sbe)_sbe.classList.remove('loading');
     _dataReady=false;
   }
   rebuildAllSelects();
@@ -2082,13 +2273,14 @@ async function loadData(){
   buildSidebarPersonal();buildDynamicPages();buildPmBancoSelect();
   renderAll();
 }
-async function saveData(){
+async function saveData(immediate){
   if(!_dataReady){
     syncBar('error','⚠️ aguardando dados da nuvem antes de salvar...');
     return;
   }
   syncBar('syncing','☁️ salvando...');
   if(saveTimer)clearTimeout(saveTimer);
+  const delay=immediate?0:400;
   saveTimer=setTimeout(async()=>{
     try{
       const r=await fetch(`${SUPA_URL}/rest/v1/despesas?id=eq.1`,{
@@ -2108,9 +2300,9 @@ async function saveData(){
       syncBar('ok','✅ salvo!');
     }catch(e){
       console.error('saveData:',e);
-      syncBar('error','⚠️ erro ao salvar: '+e.message);
+      syncBar('error','⚠️ erro ao salvar: '+e.message);toast('⚠️ erro ao salvar — verifique a conexão','erro');
     }
-  },400);
+  },delay);
 }
 
 
@@ -2390,24 +2582,34 @@ function getPersonCartaoTotal(person,month){
 // ══ RENDER CARTÃO ══
 function onCartaoMonthChange(){document.getElementById('c-btn-today').classList.toggle('visible',document.getElementById('c-month-sel').value!==TODAY);renderCartao();}
 function encerrarPagSeguro(){
-  if(!confirm('Encerrar a aba PagSeguro? As despesas serão removidas permanentemente.'))return;
+  if(!confirm('Encerrar a aba PagBank? As despesas serão removidas permanentemente.'))return;
   DB.cartao=(DB.cartao||[]).filter(e=>(e.cartao||'pagseguro')!=='pagseguro');
-  // Esconder a aba PagSeguro
+  // Esconder a aba PagBank
   const tabPag=document.getElementById('tab-pagseg');
   if(tabPag)tabPag.style.display='none';
   setCartaoAba('itau');
   saveData();
-  toast('✅ aba PagSeguro encerrada!');
+  toast('✅ aba PagBank encerrada!');
 }
 function setCartaoAba(aba){
   cartaoAba=aba;
   document.getElementById('tab-itau').classList.toggle('active',aba==='itau');
   document.getElementById('tab-pagseg').classList.toggle('active',aba==='pagseguro');
-  // Mostrar/esconder banner e botão add
   document.getElementById('banner-itau').style.display=aba==='itau'?'':'none';
   document.getElementById('banner-pagseg').style.display=aba==='pagseguro'?'':'none';
   document.getElementById('btn-add-cartao').style.display=aba==='itau'?'':'none';
+  updateCartaoTabCounts();
   renderCartao();
+}
+function updateCartaoTabCounts(){
+  const sel=document.getElementById('c-month-sel');
+  const month=(sel&&sel.value)||TODAY;
+  const nItau=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.cartao||'pagseguro')==='itau').length;
+  const nPag=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.cartao||'pagseguro')==='pagseguro').length;
+  const tItau=document.getElementById('tab-itau');
+  const tPag=document.getElementById('tab-pagseg');
+  if(tItau)tItau.textContent=nItau>0?`💳 Itaú (${nItau})`:'💳 Itaú';
+  if(tPag)tPag.textContent=nPag>0?`🟣 PagBank (${nPag})`:'🟣 PagBank';
 }
 function setCMCartao(c){
   document.getElementById('cm-cartao-itau').classList.toggle('active',c==='itau');
@@ -2420,7 +2622,7 @@ function renderCartao(){const PC=getPC();
   const month=(selEl&&selEl.value)||TODAY;
   document.getElementById('c-fat-month').textContent=getML(month);
 
-  // ── PagSeguro: calcular valor do mês e total restante ──
+  // ── PagBank: calcular valor do mês e total restante ──
   const todosPag=(DB.cartao||[]).filter(e=>(e.cartao||'pagseguro')==='pagseguro');
   const pagAtivosNoMes=todosPag.filter(e=>getInfo(e,month)!==null);
   // Valor este mês (todos os pagadores)
@@ -2445,7 +2647,7 @@ function renderCartao(){const PC=getPC();
     const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit[personFilter]||0):valParc/((e.payers||[personFilter]).length);
     return s+restParc*share;
   },0);
-  // Detectar se PagSeguro acabou (nenhuma parcela ativa a partir de hoje)
+  // Detectar se PagBank acabou
   const pagAindaAtivo=todosPag.some(e=>{
     if(!e.mesInicio||e.tipo==='rec')return false;
     const[iy,im]=e.mesInicio.split('-').map(Number);
@@ -2480,7 +2682,7 @@ function renderCartao(){const PC=getPC();
     });
   });
 
-  // ── Summary cards: mostrar valor da aba ativa da pessoa, não o total ──
+  // ── Summary cards: mostrar total apenas da aba ativa ──
   if(!document.getElementById('summary-grid-container')?.children.length){buildSummaryGrid();injectPersonaCSS();}
   Object.keys(totals).forEach(p=>{
     const el=document.getElementById('total-'+p);
@@ -2491,15 +2693,27 @@ function renderCartao(){const PC=getPC();
   const fatFiltrado=personFilter?totals[personFilter]||0:fat;
   document.getElementById('c-fat-total').innerHTML=fmt(fatFiltrado);
   document.getElementById('c-fat-label').textContent=personFilter&&PC[personFilter]
-    ?`💸 ${cartaoAba==='pagseguro'?'PagSeguro':'Itaú'} — ${PC[personFilter].label}`
-    :(cartaoAba==='pagseguro'?'🟣 PagSeguro — este mês':'💸 fatura Itaú do mês');
+    ?`💸 ${cartaoAba==='pagseguro'?'PagBank':'Itaú'} — ${PC[personFilter].label}`
+    :(cartaoAba==='pagseguro'?'🟣 PagBank — este mês':'💸 fatura Itaú do mês');
   document.getElementById('c-table-title').textContent=personFilter&&PC[personFilter]
     ?`${PC[personFilter].emoji} despesas de ${PC[personFilter].label}`
-    :(cartaoAba==='pagseguro'?'🟣 PagSeguro — parcelas em aberto':'✨ Itaú — despesas do mês');
+    :(cartaoAba==='pagseguro'?'🟣 PagBank — parcelas em aberto':'✨ Itaú — despesas do mês');
 
   // ── Tabela: valor da pessoa filtrada ou valor da parcela ──
   const tbody=document.getElementById('cartao-table');
-  document.getElementById('cartao-empty').style.display=sorted.length?'none':'block';
+  updateCartaoTabCounts();
+  // Mostrar rodapé apagar e ocultar botão add na aba PagBank
+  const pagBankFooter=document.getElementById('cartao-pagbank-footer');
+  if(pagBankFooter)pagBankFooter.style.display=cartaoAba==='pagseguro'?'block':'none';
+  const emptyEl=document.getElementById('cartao-empty');
+  if(emptyEl){
+    emptyEl.style.display=sorted.length?'none':'block';
+    if(!sorted.length&&cartaoAba==='pagseguro'){
+      emptyEl.innerHTML='<div class="icon">✅</div><p>nenhuma parcela do PagBank neste mês</p>';
+    } else if(!sorted.length){
+      emptyEl.innerHTML='<div class="icon">💳</div><p>nenhuma despesa neste mês...</p>';
+    }
+  }
   tbody.innerHTML=sorted.map(e=>{
     const p=getInfo(e,month);if(!p)return'';
     // Valor exibido: se filtro ativo, mostra a parte da pessoa; senão, valor da parcela
@@ -2524,9 +2738,77 @@ function renderCartao(){const PC=getPC();
       <td class="val-mes-desktop"><div class="value-sub">${fmt(valExibido)}</div></td>
       <td>${tags}</td>
       <td style="font-size:0.8rem;">${sd}</td>
-      <td><div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="btn-status-toggle ${(DB.cartaoStatus?.[month]?.[e.id]||'pendente')==='pago'?'badge-pago':'badge-pendente'}" onclick="toggleCartaoStatus('${e.id}','${month}')">${(DB.cartaoStatus?.[month]?.[e.id]||'pendente')==='pago'?'✅ Pago':'⏳ Pendente'}</button>
+          <div class="action-btns"><button class="btn-edit" onclick="openCartaoModal('${e.id}')">✏️</button><button class="btn-del" onclick="delCartao('${e.id}')">✕</button></div>
+        </div>
+      </td>
     </tr>`;
   }).join('');
+}
+// ── Pagar total do Itaú no mês ──
+function pagarTotalCartao(){
+  const sel=document.getElementById('c-month-sel');
+  const month=sel?.value||TODAY;
+  const itens=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.cartao||'pagseguro')==='itau');
+  if(!itens.length){toast('Nenhuma despesa do Itaú neste mês');return;}
+  if(!DB.cartaoStatus)DB.cartaoStatus={};
+  if(!DB.cartaoStatus[month])DB.cartaoStatus[month]={};
+  itens.forEach(e=>{DB.cartaoStatus[month][e.id]='pago';});
+  saveData(true);renderCartao();
+  verificarItau(month);
+}
+
+// ── Pagar total do PagBank no mês ──
+function pagarTotalPagBank(){
+  const sel=document.getElementById('c-month-sel');
+  const month=sel?.value||TODAY;
+  const itens=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.cartao||'pagseguro')==='pagseguro');
+  if(!itens.length){toast('Nenhuma parcela do PagBank neste mês');return;}
+  if(!DB.cartaoStatus)DB.cartaoStatus={};
+  if(!DB.cartaoStatus[month])DB.cartaoStatus[month]={};
+  itens.forEach(e=>{DB.cartaoStatus[month][e.id]='pago';});
+  saveData(true);renderCartao();
+  verificarPagBank(month);
+}
+
+// pagarTotalPessoal removido — despesas pessoais não avançam sozinhas
+
+// ── Pagar total do apartamento (caixa + aluguel + extras) ──
+function pagarTotalApto(){
+  const sel=document.getElementById('a-month-sel');
+  const month=sel?.value||TODAY;
+  if(!DB.apto)DB.apto={};
+  if(!DB.apto[month])DB.apto[month]={};
+  const d=DB.apto[month];
+  if(d.caixa)d.caixa.status='pago';
+  if(d.aluguel)d.aluguel.status='pago';
+  Object.keys(d.extras||{}).forEach(k=>{d.extras[k].status='pago';});
+  saveData(true);renderApto();renderDuanni();renderAlan();
+  toast('✅ Apartamento — tudo pago!','ok');
+  // Verificar se o conjunto pessoal está completo
+  const dMes=document.getElementById('d-month-sel')?.value||month;
+  verificarMesPessoal(dMes);
+}
+
+function toggleCartaoStatus(id,month){
+  if(!DB.cartaoStatus)DB.cartaoStatus={};
+  if(!DB.cartaoStatus[month])DB.cartaoStatus[month]={};
+  const cur=DB.cartaoStatus[month][id]||'pendente';
+  DB.cartaoStatus[month][id]=cur==='pago'?'pendente':'pago';
+  const pago=DB.cartaoStatus[month][id]==='pago';
+  saveData(true);renderCartao();
+  toast(pago?'✅ pago!':'↩ pendente');
+  if(pago){
+    // Identificar qual cartão e verificar o correto
+    const e=(DB.cartao||[]).find(x=>x.id===id);
+    if(e){
+      const tipo=e.cartao||'pagseguro';
+      if(tipo==='pagseguro')verificarPagBank(month);
+      else verificarItau(month);
+    }
+  }
 }
 function setFilter(p){const PC=getPC();
   personFilter=personFilter===p?null:p;
@@ -2586,7 +2868,7 @@ function renderDuanniAtalhos(){
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:1.6rem;">💰</span>
         <div>
-          <div style="font-weight:600;font-size:0.87rem;color:var(--dark);">Rendimento PagSeguro</div>
+          <div style="font-weight:600;font-size:0.87rem;color:var(--dark);">Rendimento PagBank</div>
           <div style="font-size:0.74rem;color:var(--mocha);">saldo: ${saldo>0?fmtR(saldo):'não registrado'}</div>
         </div>
         <span style="margin-left:auto;font-size:0.78rem;color:#3A345B;font-weight:500;">→</span>
@@ -2608,7 +2890,10 @@ function renderDuanni(){
   const cartaoVal=cartaoValItau+cartaoValPag;
   const aptoVal=getAptoShare(month,'duanni');
   const div=getDivisao();
-  document.getElementById('d-apto-sub').innerHTML=`<span class="num">${div.duanni||50}%</span> da divisão`;
+  const _aptoMes=(DB.apto||{})[document.getElementById('d-month-sel').value]||{};
+  const _aSubTxt=`<span class="num">${div.duanni||50}%</span> da divisão`;
+  const _aSub=document.getElementById('d-apto-sub');
+  if(_aSub)_aSub.innerHTML=_aSubTxt;
   const pessoal=(DB.pessoal||[]).filter(e=>{
     if(!e.mesInicio)return false;
     const[iy,im]=e.mesInicio.split('-').map(Number);
@@ -2620,7 +2905,7 @@ function renderDuanni(){
   const dCartaoEl=document.getElementById('d-cartao-val');
   if(dCartaoEl){
     if(cartaoValPag>0&&cartaoValItau>0)
-      dCartaoEl.innerHTML=`${fmt(cartaoVal)}<div style="font-size:0.68rem;color:var(--dusty);margin-top:3px;"><span class="badge-cartao-itau">Itaú ${fmt(cartaoValItau).replace('<span class="num">','').replace('</span>','')}</span> <span class="badge-cartao-pag" style="margin-left:3px;">PagSeg ${fmt(cartaoValPag).replace('<span class="num">','').replace('</span>','')}</span></div>`;
+      dCartaoEl.innerHTML=`${fmt(cartaoVal)}<div style="font-size:0.68rem;color:var(--dusty);margin-top:3px;"><span class="badge-cartao-itau">Itaú ${fmt(cartaoValItau).replace('<span class="num">','').replace('</span>','')}</span> <span class="badge-cartao-pag" style="margin-left:3px;">PagBank ${fmt(cartaoValPag).replace('<span class="num">','').replace('</span>','')}</span></div>`;
     else dCartaoEl.innerHTML=fmt(cartaoVal);
   }
   document.getElementById('d-apto-val').innerHTML=fmt(aptoVal);
@@ -2681,7 +2966,7 @@ function renderAlan(){
   const alCartaoEl=document.getElementById('al-cartao-val');
   if(alCartaoEl){
     if(alPag>0&&alItau>0)
-      alCartaoEl.innerHTML=`${fmt(cartaoVal)}<div style="font-size:0.68rem;color:var(--dusty);margin-top:3px;"><span class="badge-cartao-itau">Itaú ${fmt(alItau).replace(/<[^>]+>/g,'')}</span> <span class="badge-cartao-pag" style="margin-left:3px;">PagSeg ${fmt(alPag).replace(/<[^>]+>/g,'')}</span></div>`;
+      alCartaoEl.innerHTML=`${fmt(cartaoVal)}<div style="font-size:0.68rem;color:var(--dusty);margin-top:3px;"><span class="badge-cartao-itau">Itaú ${fmt(alItau).replace(/<[^>]+>/g,'')}</span> <span class="badge-cartao-pag" style="margin-left:3px;">PagBank ${fmt(alPag).replace(/<[^>]+>/g,'')}</span></div>`;
     else alCartaoEl.innerHTML=fmt(cartaoVal);
   }
   document.getElementById('al-apto-val').innerHTML=fmt(aptoVal);
@@ -2719,6 +3004,50 @@ function renderAlan(){
 }
 
 // ══ RENDER RONALDO ══
+// Verifica se todas as despesas do Ronaldo no mês estão pagas
+function isRonaldoPago(month){
+  const itens=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.payers||[]).includes('ronaldo'));
+  if(!itens.length)return false;
+  return itens.every(e=>(DB.cartaoStatus?.[month]?.[e.id]||'pendente')==='pago');
+}
+
+function verificarRonaldo(month){
+  if(!isRonaldoPago(month))return;
+  const proximo=shiftM(month,1);
+  rebuildAllSelects();
+  const sel=document.getElementById('ro-month-sel');
+  if(!sel||sel.value!==month)return;
+  if(!sel.querySelector(`option[value="${proximo}"]`))return;
+  sel.value=proximo;
+  setTimeout(()=>{
+    toast(`🎉 Ronaldo ${getML(month)} pago! → ${getML(proximo)}`,'ok');
+    renderRonaldo();
+  },300);
+}
+
+function toggleRonaldoStatus(id,month){
+  if(!DB.cartaoStatus)DB.cartaoStatus={};
+  if(!DB.cartaoStatus[month])DB.cartaoStatus[month]={};
+  const cur=DB.cartaoStatus[month][id]||'pendente';
+  DB.cartaoStatus[month][id]=cur==='pago'?'pendente':'pago';
+  const pago=DB.cartaoStatus[month][id]==='pago';
+  saveData(true);renderRonaldo();
+  toast(pago?'✅ pago!':'↩ pendente');
+  if(pago)verificarRonaldo(month);
+}
+
+function pagarTotalRonaldo(){
+  const sel=document.getElementById('ro-month-sel');
+  const month=sel?.value||TODAY;
+  const itens=(DB.cartao||[]).filter(e=>getInfo(e,month)&&(e.payers||[]).includes('ronaldo'));
+  if(!itens.length){toast('Nenhuma despesa do Ronaldo neste mês');return;}
+  if(!DB.cartaoStatus)DB.cartaoStatus={};
+  if(!DB.cartaoStatus[month])DB.cartaoStatus[month]={};
+  itens.forEach(e=>{DB.cartaoStatus[month][e.id]='pago';});
+  saveData(true);renderRonaldo();
+  verificarRonaldo(month);
+}
+
 function renderRonaldo(){
   const month=document.getElementById('ro-month-sel').value;
   const _pro=getPessoaById('ronaldo');
@@ -2743,12 +3072,19 @@ function renderRonaldo(){
     const share=e.splitMode==='custom'&&e.customSplit?(e.customSplit['ronaldo']||0):p.value/((e.payers||[]).length||1);
     tot+=share;
     const badge=e.tipo==='rec'?`<span class="badge badge-rec">🔄 mensal</span>`:`<span class="badge badge-parc"><span class="num">${p.num} de ${p.total}x</span></span>`;
-    return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);display:flex;align-items:center;gap:10px;">
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:500;font-size:0.88rem;color:var(--dark);">${e.desc}<span style="font-size:0.74rem;color:var(--mocha);font-style:italic;margin-left:6px;">${e.store}</span></div>
-        <div style="margin-top:4px;">${badge}</div>
+    const stRo=(DB.cartaoStatus?.[month]?.[e.id]||'pendente');
+    const stCls=stRo==='pago'?'badge-pago':'badge-pendente';
+    const stLbl=stRo==='pago'?'✅ Pago':'⏳ Pendente';
+    return`<div style="padding:11px 16px;border-bottom:1px solid var(--blush);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:500;font-size:0.88rem;color:var(--dark);">${e.desc}<span style="font-size:0.74rem;color:var(--mocha);font-style:italic;margin-left:6px;">${e.store}</span></div>
+          <div style="margin-top:4px;display:flex;align-items:center;gap:6px;">${badge}
+            <button class="btn-status-toggle ${stCls}" onclick="toggleRonaldoStatus('${e.id}','${month}')">${stLbl}</button>
+          </div>
+        </div>
+        <div style="font-family:var(--font-num);font-size:0.9rem;font-weight:600;color:var(--dark);white-space:nowrap;">${fmt(share)}</div>
       </div>
-      <div style="font-family:var(--font-num);font-size:0.9rem;font-weight:600;color:var(--dark);white-space:nowrap;">${fmt(share)}</div>
     </div>`;
   }).join('');
   foot.style.display='flex';
@@ -2917,8 +3253,10 @@ function toggleAptoStatus(tipo){
   if(!DB.apto[month][tipo])DB.apto[month][tipo]={};
   const cur=DB.apto[month][tipo].status||'pendente';
   DB.apto[month][tipo].status=cur==='pago'?'pendente':'pago';
-  saveData();renderApto();renderDuanni();renderAlan();
-  toast(DB.apto[month][tipo].status==='pago'?'✅ pago!':'↩ pendente');
+  const _aptoStPago=DB.apto[month][tipo].status==='pago';
+  saveData(true);renderApto();renderDuanni();renderAlan();
+  toast(_aptoStPago?'✅ pago!':'↩ pendente');
+  if(_aptoStPago)verificarMesPessoal(document.getElementById('d-month-sel')?.value||month);
 }
 function toggleAptoExtraStatus(key){
   const month=document.getElementById('a-month-sel').value;
@@ -2926,7 +3264,9 @@ function toggleAptoExtraStatus(key){
   if(!DB.apto[month].extras[key])DB.apto[month].extras[key]={};
   const cur=DB.apto[month].extras[key].status||'pendente';
   DB.apto[month].extras[key].status=cur==='pago'?'pendente':'pago';
-  saveData();renderApto();toast(DB.apto[month].extras[key].status==='pago'?'✅ pago!':'↩ pendente');
+  const _extStPago=DB.apto[month].extras[key].status==='pago';
+  saveData(true);renderApto();toast(_extStPago?'✅ pago!':'↩ pendente');
+  if(_extStPago)verificarMesPessoal(document.getElementById('d-month-sel')?.value||month);
 }
 function saveCaixaInline(){
   const month=document.getElementById('a-month-sel').value;
@@ -3260,12 +3600,14 @@ function openCartaoModal(id=null){const PC=getPC();buildPayersGrid();
     const e=(DB.cartao||[]).find(x=>x.id===id);if(!e)return;
     setCType(e.tipo||'parc');
     document.getElementById('cm-store').value=e.store;document.getElementById('cm-desc').value=e.desc;
+    if(document.getElementById('cm-cat'))document.getElementById('cm-cat').value=e.categoria||'outros';
     if(e.tipo==='rec'){document.getElementById('cm-mensal').value=e.total;document.getElementById('cm-rec-inicio').value=e.mesInicio;document.getElementById('cm-rec-fim').value=e.mesFim||'';}
     else{document.getElementById('cm-total').value=e.total;document.getElementById('cm-parcelas').value=e.parcelas;document.getElementById('cm-mes-compra').value=e.mesInicio;setTimeout(updateCMParcInfo,50);}
     (e.payers||[]).forEach(p=>{const cb=document.querySelector(`#ov-cartao .payer-option input[value="${p}"]`);if(cb)cb.checked=true;});
     setCMSplit(e.splitMode||'equal');if(e.splitMode==='custom'&&e.customSplit)setTimeout(()=>buildCMCustom(e.customSplit),60);
   }else{
-    ['cm-store','cm-desc','cm-total','cm-parcelas','cm-mensal'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+    ['cm-store','cm-desc','cm-total','cm-parcelas','cm-mensal'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';})
+    if(document.getElementById('cm-cat'))document.getElementById('cm-cat').value='outros';;
     document.querySelectorAll('#ov-cartao .payer-option input').forEach(c=>c.checked=false);
     setCMSplit('equal');setCType('parc');
     document.getElementById('cm-mes-compra').value=getMesCompraAuto();
@@ -3366,7 +3708,8 @@ function saveCartaoExpense(){const PC=getPC();
     payers.forEach(p=>{const v=parseFloat(document.getElementById('cm-split-'+p)?.value||0);customSplit[p]=v;sum+=v;});
     if(pv>0&&Math.abs(sum-pv)>0.1){toast(`⚠️ soma deve ser ${fmt(pv)}`);return;}
   }
-  const obj={store,desc,total,parcelas,mesInicio,mesFim,tipo:cmExpType,payers,splitMode:cmSplitMode,customSplit,cartao:cartaoAba};
+  const cmCateg=document.getElementById('cm-cat')?.value||'outros';
+  const obj={store,desc,total,parcelas,mesInicio,mesFim,tipo:cmExpType,payers,splitMode:cmSplitMode,customSplit,cartao:cartaoAba,categoria:cmCateg};
   if(!DB.cartao)DB.cartao=[];
   if(cmEditId){const idx=DB.cartao.findIndex(x=>x.id===cmEditId);if(idx>-1)DB.cartao[idx]={...DB.cartao[idx],...obj};toast('✅ atualizada!');}
   else{DB.cartao.push({id:Date.now().toString(),...obj});toast('✅ adicionada!');}
@@ -3407,7 +3750,7 @@ function openPessoalModal(id=null){
     ['pm-desc','pm-total','pm-obs'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
     setPMType('parc');
     document.getElementById('pm-parcelas').value=1;
-    document.getElementById('pm-mes-compra').value=document.getElementById('d-month-sel').value;
+    document.getElementById('pm-mes-compra').value=getMesCompraAuto();
     document.getElementById('pm-cat').value='outros';
     document.getElementById('pm-forma').value='credito';
     document.getElementById('pm-banco').value='';
@@ -3455,17 +3798,19 @@ function savePessoalExpense(){
   rebuildAllSelects();renderDuanni();
 }
 function delPessoal(id){
-  if(!confirm('Remover?'))return;
+  if(!confirm('Remover esta despesa? Essa ação não pode ser desfeita.'))return;
   DB.pessoal=(DB.pessoal||[]).filter(e=>e.id!==id);
   saveData();toast('🗑️ removida!');rebuildAllSelects();renderDuanni();
 }
 function togglePessoalStatus(id,month){
   const e=(DB.pessoal||[]).find(x=>x.id===id);if(!e)return;
   if(!e.statusPorMes)e.statusPorMes={};
-  // status base só usado quando não há statusPorMes
   const cur=e.statusPorMes[month]||'pendente';
   e.statusPorMes[month]=cur==='pago'?'pendente':'pago';
-  saveData();renderDuanni();toast(e.statusPorMes[month]==='pago'?'✅ pago!':'↩ pendente');
+  const pago=e.statusPorMes[month]==='pago';
+  saveData(true);renderDuanni();toast(pago?'✅ pago!':'↩ pendente');
+  // Despesas pessoais não avançam sozinhas — apenas contribuem para o conjunto
+  if(pago)verificarMesPessoal(month);
 }
 
 // ══ RENDER ALL ══
