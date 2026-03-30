@@ -388,7 +388,32 @@ input[type=month]::-webkit-date-and-time-value{
 .collapsible-arrow{font-size:0.8rem;color:var(--rose);transition:transform 0.25s;display:inline-block;}
 .collapsible-arrow.open{transform:rotate(90deg);}
 .collapsible-body{display:none;padding:16px 18px;}
-.collapsible-body.open{display:block;}
+/* ── Planejamento ── */
+.plan-receita-row{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--blush);}
+.plan-receita-row input{flex:1;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;background:var(--cream);border:1.5px solid var(--blush);border-radius:10px;padding:8px 12px;color:var(--dark);outline:none;transition:border-color 0.2s;}
+.plan-receita-row input:focus{border-color:#c4607a;}
+.plan-saldo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 16px;}
+.plan-bc{border-radius:12px;padding:13px 14px;text-align:center;}
+.plan-bc-label{font-size:0.62rem;letter-spacing:0.09em;text-transform:uppercase;font-weight:500;margin-bottom:5px;color:var(--mocha);}
+.plan-bc-value{font-family:var(--font-num);font-size:1.2rem;font-weight:700;line-height:1.1;}
+.plan-bc.receita{background:#f0fff4;}
+.plan-bc.despesas{background:#fff3f3;}
+.plan-bc.saldo-pos{background:#e8f5e9;}
+.plan-bc.saldo-neg{background:#fce8e8;}
+.plan-bc.saldo-warn{background:#fff8e1;}
+.sim-mes-card{border-radius:12px;border:1.5px solid var(--blush);padding:12px 14px;transition:all 0.2s;background:var(--white);}
+.sim-mes-card.melhor{border-color:#4a8050;background:#f0fff4;}
+.sim-mes-card.apertado{border-color:#b8640e;background:#fff8e1;}
+.sim-mes-card.negativo{border-color:#9b5c5c;background:#fce8e8;}
+.sim-mes-label{font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;margin-bottom:4px;}
+.sim-mes-card.melhor .sim-mes-label{color:#4a8050;}
+.sim-mes-card.apertado .sim-mes-label{color:#b8640e;}
+.sim-mes-card.negativo .sim-mes-label{color:#9b5c5c;}
+@media(max-width:700px){
+  .plan-saldo-grid{grid-template-columns:1fr 1fr;gap:8px;padding:12px;}
+  .plan-bc-value{font-size:1rem;}
+  .plan-bc:last-child{grid-column:1/-1;}
+}
 </style>
 <style id="dynamic-persona-css"></style>
 </head>
@@ -524,6 +549,49 @@ input[type=month]::-webkit-date-and-time-value{
     </div>
     <div id="duanni-custom-cards-btn"></div>
     <div id="duanni-atalhos" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-bottom:4px;"></div>
+
+    <!-- PLANEJAMENTO -->
+    <div class="table-section" style="margin-top:20px;margin-bottom:22px;">
+      <div class="collapsible-header" onclick="toggleCollapse(this)" style="padding:14px 18px;">
+        <h2>🗓️ planejamento do mês</h2><span class="collapsible-arrow">›</span>
+      </div>
+      <div class="collapsible-body" style="padding:0;">
+        <!-- Receita mensal -->
+        <div class="plan-receita-row">
+          <span style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--mocha);font-weight:500;white-space:nowrap;">💵 receita mensal</span>
+          <input type="number" id="plan-receita-input" step="0.01" placeholder="ex: 3000,00" oninput="renderPlanejamento()">
+          <button onclick="savePlanReceita()" style="background:var(--dark);color:white;border:none;border-radius:10px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;white-space:nowrap;">💾</button>
+        </div>
+        <!-- Resumo do mês -->
+        <div class="plan-saldo-grid" id="plan-saldo-grid">
+          <div class="plan-bc receita"><div class="plan-bc-label">receita</div><div class="plan-bc-value" id="plan-val-receita">—</div></div>
+          <div class="plan-bc despesas"><div class="plan-bc-label">despesas</div><div class="plan-bc-value" id="plan-val-despesas">—</div></div>
+          <div class="plan-bc saldo-pos" id="plan-bc-saldo"><div class="plan-bc-label">saldo</div><div class="plan-bc-value" id="plan-val-saldo">—</div></div>
+        </div>
+        <!-- Projeção próximos meses -->
+        <div style="padding:0 16px 14px;">
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);font-weight:500;margin-bottom:10px;">📊 projeção — próximos meses</div>
+          <div id="plan-projecao" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+        <!-- Simulador de compra -->
+        <div style="border-top:1px solid var(--blush);padding:14px 16px 16px;">
+          <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);font-weight:500;margin-bottom:12px;">🛒 simular nova compra</div>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <div><label class="lbl-field">nome da compra</label>
+            <input type="text" id="sim-nome" class="inp-field" placeholder="ex: iPhone 16"></div>
+            <div><label class="lbl-field">valor total (R$)</label>
+            <input type="number" id="sim-valor" step="0.01" class="inp-field" placeholder="0,00" oninput="renderSimulacao()"></div>
+          </div>
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div><label class="lbl-field">parcelas</label>
+            <input type="number" id="sim-parcelas" min="1" value="1" class="inp-field" placeholder="1" oninput="renderSimulacao()"></div>
+            <div><label class="lbl-field">meses a analisar</label>
+            <input type="number" id="sim-range" min="1" max="12" value="4" class="inp-field" oninput="renderSimulacao()"></div>
+          </div>
+          <div id="sim-resultado" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -1085,7 +1153,7 @@ const CAIXA_TAXA=0.0017;
 // Descontos do aluguel — valores padrão (editáveis via DB)
 
 // ══ STATE ══
-let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9,cartaoStatus:{}};
+let DB={cartao:[],pessoal:[],apto:{},bancos:null,devoIds:[],devoConfig:{titulo:'💕 cartão do meu amor',legenda:'despesas minhas no cartão dele · subtraído do total'},pessoas:null,abas:null,customCards:{},divisao:{duanni:50,alan:50},desc_garagem:null,desc_fundo:null,diaCorte:9,cartaoStatus:{},receitaMensal:0};
 let saveTimer=null;
 let _dataReady=false;
 // Limpar qualquer cache local antigo
@@ -1641,6 +1709,7 @@ function mcSaveRename(){
   saveData();renderMetaCelular();
   // Atualizar card de atalho na Duanni
   renderDuanniAtalhos();
+  renderPlanejamento();
 
   toast('✅ nome atualizado!');
 }
@@ -2181,6 +2250,7 @@ function _applyData(d){
   if(d.diaCorte!=null)DB.diaCorte=Number(d.diaCorte)||9;
   if(d.diaCorteConfig&&typeof d.diaCorteConfig==='object')DB.diaCorteConfig=d.diaCorteConfig;
   if(d.cartaoStatus&&typeof d.cartaoStatus==='object')DB.cartaoStatus=d.cartaoStatus;
+  if(d.receitaMensal!=null)DB.receitaMensal=Number(d.receitaMensal)||0;
 }
 
 // Retorna apenas os campos que devem ser persistidos no Supabase
@@ -2201,7 +2271,8 @@ function _serializeDB(){
     descontos:DB.descontos||null,
     diaCorte:DB.diaCorte||9,
     diaCorteConfig:DB.diaCorteConfig||{},
-    cartaoStatus:DB.cartaoStatus||{}
+    cartaoStatus:DB.cartaoStatus||{},
+    receitaMensal:DB.receitaMensal||0
   };
 }
 
@@ -2847,6 +2918,141 @@ function renderDuanniAtalhos(){
   }
   atalhos.innerHTML=cards.join('');
 }
+// ══ PLANEJAMENTO ══
+function getTotalDespesasMes(mes){
+  // Total de despesas da Duanni num mês: cartão + apto + pessoal
+  const cartaoItau=getPersonCartaoTotalByCarta('duanni',mes,'itau');
+  const cartaoPag=getPersonCartaoTotalByCarta('duanni',mes,'pagseguro');
+  const apto=getAptoShare(mes,'duanni');
+  const pessoal=(DB.pessoal||[]).reduce((s,e)=>{
+    if(!e.mesInicio)return s;
+    const[iy,im]=e.mesInicio.split('-').map(Number);
+    const[ty,tm]=mes.split('-').map(Number);
+    const diff=(ty-iy)*12+(tm-im);
+    const ativo=e.tipo==='rec'?diff>=0:(diff>=0&&diff<(e.parcelas||1));
+    if(!ativo)return s;
+    return s+(e.tipo==='rec'?e.total:e.total/(e.parcelas||1));
+  },0);
+  return cartaoItau+cartaoPag+apto+pessoal;
+}
+
+function savePlanReceita(){
+  const v=parseFloat(document.getElementById('plan-receita-input').value)||0;
+  DB.receitaMensal=v;
+  saveData();renderPlanejamento();toast('✅ receita salva!');
+}
+
+function renderPlanejamento(){
+  const receita=parseFloat(document.getElementById('plan-receita-input')?.value)||DB.receitaMensal||0;
+  const month=document.getElementById('d-month-sel')?.value||TODAY;
+  const fmtR=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const despesas=getTotalDespesasMes(month);
+  const saldo=receita-despesas;
+
+  // Preencher input se ainda não preenchido
+  const inp=document.getElementById('plan-receita-input');
+  if(inp&&!inp.value&&DB.receitaMensal)inp.value=DB.receitaMensal;
+
+  // Resumo
+  const vR=document.getElementById('plan-val-receita');
+  const vD=document.getElementById('plan-val-despesas');
+  const vS=document.getElementById('plan-val-saldo');
+  const bcS=document.getElementById('plan-bc-saldo');
+  if(vR)vR.textContent=receita>0?fmtR(receita):'não definida';
+  if(vD)vD.textContent=fmtR(despesas);
+  if(vS){
+    vS.textContent=fmtR(Math.abs(saldo));
+    vS.style.color=saldo>=0?'#4a8050':'#9b5c5c';
+    if(vS.previousElementSibling)vS.previousElementSibling.textContent=saldo>=0?'sobra':'falta';
+  }
+  if(bcS){
+    bcS.className='plan-bc '+(saldo>=0?(saldo>receita*0.2?'saldo-pos':'saldo-warn'):'saldo-neg');
+  }
+
+  // Projeção próximos meses
+  const proj=document.getElementById('plan-projecao');
+  if(proj){
+    const meses=Array.from({length:5},(_,i)=>shiftM(TODAY,i));
+    proj.innerHTML=meses.map(m=>{
+      const desp=getTotalDespesasMes(m);
+      const sal=receita-desp;
+      const isCurrent=m===TODAY;
+      const cls=sal>=0?(sal>receita*0.2?'':'apertado'):'negativo';
+      const icon=sal>=0?(sal>receita*0.2?'✅':'⚠️'):'❌';
+      return`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:${isCurrent?'var(--blush)':'var(--cream)'};border:1.5px solid ${isCurrent?'var(--rose)':'var(--blush)'};">
+        <div style="font-size:0.82rem;font-weight:${isCurrent?'600':'400'};color:var(--dark);min-width:72px;">${getML(m)}${isCurrent?' <span style="font-size:0.66rem;color:var(--rose);">(atual)</span>':''}</div>
+        <div style="flex:1;font-size:0.75rem;color:var(--dusty);">despesas: <span style="font-family:var(--font-num);color:var(--dark);">${fmtR(desp)}</span></div>
+        <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:${sal>=0?'#4a8050':'#9b5c5c'};white-space:nowrap;">${sal>=0?'+':''}${fmtR(sal)}</div>
+        <span style="font-size:0.9rem;">${icon}</span>
+      </div>`;
+    }).join('');
+  }
+  renderSimulacao();
+}
+
+function renderSimulacao(){
+  const receita=parseFloat(document.getElementById('plan-receita-input')?.value)||DB.receitaMensal||0;
+  const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
+  const parcelas=parseInt(document.getElementById('sim-parcelas')?.value)||1;
+  const range=parseInt(document.getElementById('sim-range')?.value)||4;
+  const nome=document.getElementById('sim-nome')?.value?.trim()||'nova compra';
+  const res=document.getElementById('sim-resultado');
+  if(!res)return;
+  if(!valor){res.innerHTML='<div style="font-size:0.8rem;color:var(--dusty);font-style:italic;text-align:center;padding:8px 0;">informe o valor para simular</div>';return;}
+  if(!receita){res.innerHTML='<div style="font-size:0.8rem;color:var(--rose);text-align:center;padding:8px 0;">⚠️ defina sua receita mensal primeiro</div>';return;}
+
+  const fmtR=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const valParcela=valor/parcelas;
+
+  // Analisar cada mês como ponto de início
+  const resultados=Array.from({length:range},(_,i)=>shiftM(TODAY,i)).map(mesInicio=>{
+    // Para cada mês de início, calcular o saldo em cada parcela
+    let piorSaldo=Infinity;
+    let mesesImpactados=[];
+    for(let j=0;j<parcelas;j++){
+      const m=shiftM(mesInicio,j);
+      const despBase=getTotalDespesasMes(m);
+      const saldoBase=receita-despBase;
+      const saldoComCompra=saldoBase-valParcela;
+      if(saldoComCompra<piorSaldo)piorSaldo=saldoComCompra;
+      mesesImpactados.push({mes:m,saldoBase,saldoComCompra});
+    }
+    const saldoMesInicio=receita-getTotalDespesasMes(mesInicio);
+    return{mesInicio,piorSaldo,saldoMesInicio,mesesImpactados,valParcela};
+  });
+
+  // Ordenar: maior pior saldo = melhor opção
+  const ordenados=[...resultados].sort((a,b)=>b.piorSaldo-a.piorSaldo);
+  const melhor=ordenados[0];
+
+  res.innerHTML=`
+    <div style="background:#f0fff4;border:1.5px solid #4a8050;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+      <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#4a8050;font-weight:600;margin-bottom:6px;">🏆 melhor mês para iniciar</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--dark);">${getML(melhor.mesInicio)}</div>
+      <div style="font-size:0.78rem;color:var(--dusty);margin-top:2px;">${nome} · ${fmtR(valor)}${parcelas>1?` em ${parcelas}x de ${fmtR(valParcela)}`:''}</div>
+      <div style="margin-top:8px;font-size:0.82rem;color:var(--dark);">Saldo atual: <span style="font-family:var(--font-num);font-weight:600;">${fmtR(melhor.saldoMesInicio)}</span> → após compra: <span style="font-family:var(--font-num);font-weight:600;color:${melhor.piorSaldo>=0?'#4a8050':'#9b5c5c'};">${fmtR(melhor.piorSaldo)}</span> <span style="font-size:0.74rem;color:var(--dusty);">${melhor.piorSaldo>=receita*0.15?'✅ seguro':melhor.piorSaldo>=0?'⚠️ apertado':'❌ negativo'}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${resultados.map((r,i)=>{
+        const isMelhor=r.mesInicio===melhor.mesInicio;
+        const cls=r.piorSaldo>=receita*0.15?'melhor':r.piorSaldo>=0?'apertado':'negativo';
+        const icon=r.piorSaldo>=receita*0.15?'✅':r.piorSaldo>=0?'⚠️':'❌';
+        return`<div class="sim-mes-card ${cls}" style="${isMelhor?'box-shadow:0 2px 10px rgba(74,128,80,0.2);':''}">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="sim-mes-label">${icon} ${getML(r.mesInicio)}${isMelhor?' ★ recomendado':''}</div>
+              <div style="font-size:0.74rem;color:var(--dusty);">saldo atual: ${fmtR(r.saldoMesInicio)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:var(--font-num);font-size:0.95rem;font-weight:700;color:${r.piorSaldo>=0?'#4a8050':'#9b5c5c'};">${r.piorSaldo>=0?'+':''}${fmtR(r.piorSaldo)}</div>
+              <div style="font-size:0.7rem;color:var(--dusty);">após compra</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
 function renderDuanni(){
   const month=document.getElementById('d-month-sel').value;
   const _pd=getPessoaById('duanni');
